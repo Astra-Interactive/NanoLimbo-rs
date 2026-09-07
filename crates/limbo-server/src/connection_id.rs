@@ -4,7 +4,6 @@
 /// offline mode a UUID is derived from the username, so two players with the same name
 /// collide: the second evicts the first, and when the first leaves it removes the
 /// second's entry, leaving the online count permanently wrong. A counter cannot collide.
-/// See MIGRATION_PLAN.md section 3.1.2.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ConnectionId(u64);
 

@@ -40,4 +40,4 @@ verified against anything.
 At that point it is worth asking whether the fixtures still need regenerating at all. They
 were the oracle for the port; once every version they cover is verified, they work as
 self-hosted regression snapshots and only a genuinely new version needs new reference
-bytes. See `MIGRATION_PLAN.md` section 7.8.
+bytes.

@@ -54,7 +54,7 @@ import java.util.TreeSet;
 
 /**
  * Dumps the byte-level output of this implementation so the Rust port can be checked
- * against it. See rust/MIGRATION_PLAN.md section 7 — this is the level 1 oracle.
+ * against it. This is the level 1 oracle: byte-for-byte reference output.
  *
  * <p>Not part of the server. Run it explicitly:
  * <pre>java -cp build/libs/NanoLimbo.jar ua.nanit.limbo.tools.FixtureDumper rust/fixtures</pre>

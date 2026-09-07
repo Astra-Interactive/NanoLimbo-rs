@@ -1,10 +1,10 @@
 //! Walks every supported protocol version through a real server, over a real socket.
 //!
-//! This is level 2 of `MIGRATION_PLAN.md` section 7.4: the packet-level suites prove each
-//! packet's bytes, and this proves the sequence — that the server sends the right things,
-//! in the right order, for the phase the client is in. The version branching it covers is
-//! exactly where a limbo server goes wrong: the configuration phase appearing at 1.20.2,
-//! known packs at 1.20.5, and the older clients that get neither.
+//! The packet-level suites prove each packet's bytes; this proves the sequence — that the
+//! server sends the right things, in the right order, for the phase the client is in. The
+//! version branching it covers is exactly where a limbo server goes wrong: the
+//! configuration phase appearing at 1.20.2, known packs at 1.20.5, and the older clients
+//! that get neither.
 //!
 //! It runs against the shipped configuration, so it also proves that configuration
 //! actually serves players rather than merely parsing.

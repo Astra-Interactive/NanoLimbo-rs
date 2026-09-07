@@ -12,8 +12,6 @@
 //! its style, adjacent same-styled text joins, a style equal to the inherited one is
 //! dropped, and a wrapper around a single child disappears. Each is documented where it
 //! is implemented.
-//!
-//! See `MIGRATION_PLAN.md` section 7.
 
 use serde_json::Value;
 

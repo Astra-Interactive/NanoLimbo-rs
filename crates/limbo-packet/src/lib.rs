@@ -8,8 +8,7 @@
 //!
 //! Nothing in this crate reads a clock or a random source. Values the Java implementation
 //! drew from `Random` — entity ids, teleport ids, session and boss bar uuids, keep alive
-//! ids — arrive as fields, which is what makes byte-level golden tests possible. See
-//! `MIGRATION_PLAN.md` section 7.5.
+//! ids — arrive as fields, which is what makes byte-level golden tests possible.
 
 pub mod configuration;
 pub mod login;

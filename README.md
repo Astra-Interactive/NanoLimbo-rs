@@ -6,7 +6,6 @@ is down. It runs no game logic — there is no world, no physics, no inventory.
 
 A port of [Nan1t/NanoLimbo](https://github.com/Nan1t/NanoLimbo), which remains the
 behavioural reference: this project is verified against byte-level dumps taken from it.
-See `MIGRATION_PLAN.md` for the architecture, the phased plan, and the testing strategy.
 
 This repository stands alone. The reference dumps it is checked against are committed in
 `fixtures/`, together with the tool that produces them, so nothing here depends on having
@@ -136,12 +135,11 @@ milliseconds.
 
 ## Differences from the Java implementation
 
-Deliberate, and each documented at the site and in `MIGRATION_PLAN.md`:
+Deliberate, and each documented where it is implemented:
 
-- **Fixed:** the clientbound disconnect id on 1.20.3/1.20.4 (§3.1.6), the serverbound
-  configuration plugin message id from 1.20.2 (§3.1.5), text silently dropped from
-  components on 1.20.3+ (§3.1.10), and the connection registry keying that lost track of
-  two players sharing a name (§3.1.2).
+- **Fixed:** the clientbound disconnect id on 1.20.3/1.20.4, the serverbound configuration
+  plugin message id from 1.20.2, text silently dropped from components on 1.20.3+, and the
+  connection registry keying that lost track of two players sharing a name.
 - **Hardened:** no path reachable from network input can panic; BungeeGuard tokens are
   compared in constant time; the traffic limiter cannot overflow into disabling itself.
 - **Not carried over:** `netty.transportType: IO_URING` and `netty.threads.bossGroup`

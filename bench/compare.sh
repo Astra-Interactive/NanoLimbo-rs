@@ -2,9 +2,9 @@
 #
 # Loads this server, and optionally the Java original beside it, and prints what each costs.
 #
-# This is the measurement in MIGRATION_PLAN.md section 9, made reproducible. Both servers
-# get the same settings.yml, the same number of players and the same client, and their
-# memory is read from one place at one moment rather than from two tools at two times.
+# Both servers get the same settings.yml, the same number of players and the same client,
+# and their memory is read from one place at one moment rather than from two tools at two
+# times.
 #
 #   ./bench/compare.sh                              this server alone
 #   ./bench/compare.sh --players 1000

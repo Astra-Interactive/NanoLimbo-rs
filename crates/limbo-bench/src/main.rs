@@ -1,7 +1,7 @@
 //! Logs a crowd of players into one or more limbo servers and reports what each one cost.
 //!
-//! Written to make the comparison in `MIGRATION_PLAN.md` section 9 reproducible rather
-//! than something to take on trust: point it at two servers and it prints the same table.
+//! Written so the comparison is reproducible rather than something to take on trust:
+//! point it at two servers and it prints the same table.
 //!
 //! It speaks the protocol through the same version tables the server uses, so a new
 //! Minecraft release cannot leave it silently measuring a failed login.

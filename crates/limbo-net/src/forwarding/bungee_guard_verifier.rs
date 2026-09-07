@@ -61,7 +61,7 @@ impl BungeeGuardVerifier {
     /// character at a time. Upstream uses `List.contains`, which does exactly that —
     /// even though the Velocity path beside it correctly uses `MessageDigest.isEqual`.
     /// Every configured token is examined, so the timing does not reveal which one, or
-    /// how many, matched. See MIGRATION_PLAN.md section 3.1b.
+    /// how many, matched.
     fn accepts(&self, offered: &str) -> bool {
         self.tokens
             .iter()

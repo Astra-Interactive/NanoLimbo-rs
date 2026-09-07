@@ -5,7 +5,7 @@ use uuid::Uuid;
 /// Every one of these reaches the wire, so making them an injected dependency is what
 /// allows a packet to be compared byte-for-byte against a reference dump. Calling a
 /// global generator inside the encoders would make that impossible, which is why this
-/// port exists at all — see MIGRATION_PLAN.md section 7.5.
+/// port exists at all.
 pub trait IdSource: Send + Sync {
     /// Entity id for the join game packet.
     fn next_entity_id(&self) -> i32;
