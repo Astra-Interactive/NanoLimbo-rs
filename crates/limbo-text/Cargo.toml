@@ -8,7 +8,11 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+bytes.workspace = true
+limbo-protocol = { path = "../limbo-protocol" }
+serde_json.workspace = true
 thiserror.workspace = true
+valence_nbt.workspace = true
 
 [lints]
 workspace = true
