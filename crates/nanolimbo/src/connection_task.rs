@@ -8,6 +8,8 @@ use limbo_config::InfoForwarding;
 use limbo_net::forwarding::parse_legacy_handshake;
 use limbo_net::frame::VarIntFrameCodec;
 use limbo_net::identity::offline_mode_uuid;
+use limbo_net::time::SystemClock;
+use limbo_net::traffic::{TrafficLimiter, TrafficLimits, TrafficVerdict};
 use limbo_packet::login::{LoginDisconnect, LoginPluginRequest};
 use limbo_packet::play::{Disconnect, KeepAlive};
 use limbo_packet::status::StatusResponse;
@@ -59,6 +61,7 @@ enum Ending {
     Timeout,
     Refused,
     Malformed,
+    TooMuchTraffic,
     ServerStopping,
 }
 
@@ -479,6 +482,24 @@ struct ForwardedFromProxy {
     uuid: Uuid,
 }
 
+/// Builds the per-connection limiter, or nothing when limits are switched off.
+///
+/// Each connection gets its own: the limits are per player, and sharing one would let a
+/// busy server throttle a quiet client.
+fn build_limiter(context: &ServerContext) -> Option<TrafficLimiter<SystemClock>> {
+    let traffic = context.config.traffic.as_ref()?;
+
+    Some(TrafficLimiter::new(
+        TrafficLimits {
+            max_packet_size: traffic.max_packet_size.map(|size| size as usize),
+            window: traffic.interval.unwrap_or(Duration::ZERO),
+            max_packets_per_second: traffic.max_packet_rate,
+            max_bytes_per_second: traffic.max_packet_bytes_rate,
+        },
+        SystemClock,
+    ))
+}
+
 /// Serves one client until it leaves, misbehaves, or the server stops.
 pub async fn serve(
     stream: TcpStream,
@@ -491,6 +512,7 @@ pub async fn serve(
     }
 
     let read_timeout = context.config.read_timeout;
+    let mut limiter = build_limiter(&context);
     let mut session = Session::new(Arc::clone(&context), address);
     let mut connection = Framed::new(stream, VarIntFrameCodec);
     let mut keep_alive = tokio::time::interval(KEEP_ALIVE_INTERVAL);
@@ -512,6 +534,12 @@ pub async fn serve(
             Err(ending) => break ending,
         };
 
+        if let Some(limiter) = limiter.as_mut()
+            && let Some(ending) = check_traffic(limiter, &session, frame.len())
+        {
+            break ending;
+        }
+
         if let Some(ending) = handle_frame(&mut session, &mut connection, frame).await {
             break ending;
         }
@@ -523,6 +551,27 @@ pub async fn serve(
         tracing::info!("Player {} disconnected", player.username);
     }
     tracing::debug!(?ending, address = %session.reported_address(), "connection closed");
+}
+
+/// Applies the configured traffic limits to one frame.
+///
+/// Over the limit the connection is dropped without a message, as upstream does: a client
+/// flooding the server is not one that will read a kick screen.
+fn check_traffic(
+    limiter: &mut TrafficLimiter<SystemClock>,
+    session: &Session,
+    size: usize,
+) -> Option<Ending> {
+    match limiter.check(size) {
+        TrafficVerdict::Allowed => None,
+        verdict => {
+            tracing::info!(
+                "Closed {} due to traffic limits: {verdict:?}",
+                session.reported_address()
+            );
+            Some(Ending::TooMuchTraffic)
+        }
+    }
 }
 
 /// Waits for the next frame, treating silence past the configured timeout as a departure.
