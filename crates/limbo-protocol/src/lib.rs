@@ -4,4 +4,5 @@
 //! so all of it is host-testable.
 
 pub mod buffer;
+pub mod packet;
 pub mod version;
