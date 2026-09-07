@@ -1,0 +1,42 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-09-08T00:00:00+00:00",
+    "name": "NanoLimbo-rs (Debian)",
+    "author": "r.makeev@flipper.net",
+    "description": "A tiny, fast Minecraft limbo server written in Rust. Keeps players connected while your real server restarts - 51 protocol versions, Minecraft 1.7.2 (protocol 4) through 26.2 (protocol 776), from one static binary and a few megabytes of RAM.",
+    "features": null,
+    "docker_images": {
+        "ghcr.io\/parkervcp\/yolks:debian": "ghcr.io\/parkervcp\/yolks:debian"
+    },
+    "file_denylist": [],
+    "startup": ".\/nanolimbo",
+    "config": {
+        "files": "{\r\n    \"settings.yml\": {\r\n        \"parser\": \"file\",\r\n        \"find\": {\r\n            \"  ip: \": \"  ip: \\\"0.0.0.0\\\"\",\r\n            \"  port: \": \"  port: {{server.build.default.port}}\"\r\n        }\r\n    }\r\n}",
+        "startup": "{\r\n    \"done\": \"Server started on\"\r\n}",
+        "logs": "{}",
+        "stop": "stop"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!\/bin\/sh\r\n# NanoLimbo-rs Installation Script\r\nset -e\r\n\r\napt-get update\r\napt-get install -y curl jq\r\n\r\nUNAME_M=\"$(uname -m)\"\r\ncase \"$UNAME_M\" in\r\n  x86_64)   ARCH='x86_64' ;;\r\n  aarch64)  ARCH='aarch64' ;;\r\n  *)\r\n    echo \"ERROR: Unsupported arch: $UNAME_M\" >&2\r\n    exit 1\r\n    ;;\r\nesac\r\n\r\nGITHUB_PACKAGE=\"Astra-Interactive\/NanoLimbo-rs\"\r\nPATTERN=\"nanolimbo_linux-${ARCH}-gnu[.]tar[.]gz\"\r\n\r\nselect_asset_url() {\r\n  jq -r --arg pat \"$PATTERN\" '\r\n    .assets[].browser_download_url\r\n    | select(test($pat))\r\n  '\r\n}\r\n\r\n# The panel patches settings.yml line by line, so both bind keys must be present at the\r\n# indentation the shipped file uses, or the server would ignore its allocation.\r\nhas_patchable_bind() {\r\n  grep -q '^  ip: ' settings.yml && grep -q '^  port: ' settings.yml\r\n}\r\n\r\necho \"Fetching GitHub releases metadata...\"\r\nALL_JSON=\"$(curl -s \"https:\/\/api.github.com\/repos\/$GITHUB_PACKAGE\/releases\")\"\r\nLATEST_JSON=\"$(printf '%s\\n' \"$ALL_JSON\" \\\r\n  | jq 'map(select(.prerelease==false)) | sort_by(.published_at) | reverse | .[0]')\"\r\n\r\n# Release tags are bare workspace versions, without a 'v' prefix (e.g. 0.3.0). The ref is\r\n# used to fetch the settings.yml that ships with the very binary being installed.\r\nSETTINGS_REF=\"master\"\r\n\r\nif [ -n \"$DOWNLOAD_URL\" ]; then\r\n  echo \"Using provided DOWNLOAD_URL\"\r\n  if ! curl -Isf \"$DOWNLOAD_URL\" >\/dev\/null; then\r\n    echo \"ERROR: Provided download URL is invalid.\" >&2\r\n    exit 1\r\n  fi\r\n\r\nelif [ -n \"$VERSION\" ] && [ \"$VERSION\" != \"latest\" ]; then\r\n  echo \"Looking for tag '$VERSION'...\"\r\n  MATCH=\"$(printf '%s\\n' \"$ALL_JSON\" \\\r\n    | jq -c --arg v \"$VERSION\" '.[] | select(.tag_name==$v)')\"\r\n  if [ -n \"$MATCH\" ]; then\r\n    DOWNLOAD_URL=\"$(printf '%s\\n' \"$MATCH\" | select_asset_url)\"\r\n    SETTINGS_REF=\"$VERSION\"\r\n  else\r\n    echo \"Warning: tag '$VERSION' not found, falling back to latest stable.\"\r\n    DOWNLOAD_URL=\"$(printf '%s\\n' \"$LATEST_JSON\" | select_asset_url)\"\r\n    SETTINGS_REF=\"$(printf '%s\\n' \"$LATEST_JSON\" | jq -r '.tag_name \/\/ \"master\"')\"\r\n  fi\r\n\r\nelse\r\n  echo \"Selecting latest stable release...\"\r\n  DOWNLOAD_URL=\"$(printf '%s\\n' \"$LATEST_JSON\" | select_asset_url)\"\r\n  SETTINGS_REF=\"$(printf '%s\\n' \"$LATEST_JSON\" | jq -r '.tag_name \/\/ \"master\"')\"\r\nfi\r\n\r\nif [ -z \"$DOWNLOAD_URL\" ]; then\r\n  echo \"ERROR: No release asset matching '$PATTERN' was found.\" >&2\r\n  exit 1\r\nfi\r\n\r\nmkdir -p \/mnt\/server\r\ncd \/mnt\/server\r\n\r\nSERVER_BINARY=${SERVER_BINARY:-nanolimbo}\r\nARCHIVE=${DOWNLOAD_URL##*\/}\r\n\r\necho \"Downloading $ARCHIVE ...\"\r\ncurl -sSL -o \"$ARCHIVE\" \"$DOWNLOAD_URL\"\r\n\r\necho \"Extracting...\"\r\ntar -xzf \"$ARCHIVE\"\r\nrm \"$ARCHIVE\"\r\n\r\nchmod +x \"$SERVER_BINARY\"\r\n\r\n# The server has no command line flags: it reads settings.yml from its working directory\r\n# and writes the shipped default there when the file is missing. That default binds\r\n# localhost:65535, and the panel only rewrites a file that already exists - so without\r\n# this step the first boot would come up on the wrong port, unreachable from outside the\r\n# container. Fetching the file instead of embedding it keeps one source of truth.\r\nif [ ! -f settings.yml ]; then\r\n  echo \"Installing default settings.yml ...\"\r\n  SETTINGS_URL=\"https:\/\/raw.githubusercontent.com\/$GITHUB_PACKAGE\/$SETTINGS_REF\/crates\/limbo-config\/resources\/settings.yml\"\r\n  if ! curl -sSLf -o settings.yml \"$SETTINGS_URL\" || ! has_patchable_bind; then\r\n    echo \"Warning: could not fetch the documented default, writing a minimal one.\"\r\n    printf '%s\\n' \\\r\n      '# The panel rewrites both values below on every boot.' \\\r\n      '# Every other setting falls back to its built-in default; the fully documented' \\\r\n      '# file lives at crates\/limbo-config\/resources\/settings.yml in the source tree.' \\\r\n      'bind:' \\\r\n      '  ip: \"0.0.0.0\"' \\\r\n      '  port: 25565' > settings.yml\r\n  fi\r\nfi\r\n\r\necho \"-----------------------------------------\"\r\necho \"Installed NanoLimbo-rs -> \/mnt\/server\/$SERVER_BINARY\"\r\necho \"-----------------------------------------\"",
+            "container": "ghcr.io\/parkervcp\/installers:debian",
+            "entrypoint": "sh"
+        }
+    },
+    "variables": [
+        {
+            "name": "Version",
+            "description": "Specifies the Git tag of the release to install (e.g., `0.3.0`). Release tags are bare workspace versions, without a `v` prefix. When set to `latest` (or left unset), the installer selects the newest stable release.",
+            "env_variable": "VERSION",
+            "default_value": "latest",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "string|required",
+            "field_type": "text"
+        }
+    ]
+}
