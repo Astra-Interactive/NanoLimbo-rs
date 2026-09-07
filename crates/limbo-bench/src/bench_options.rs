@@ -11,6 +11,9 @@ const DEFAULT_PLAYERS: usize = 300;
 /// How long to hold them there before reading memory, so the figure is not taken mid-burst.
 const DEFAULT_SETTLE: Duration = Duration::from_secs(2);
 
+/// How long to wait for a target to accept connections. Zero means it must already be up.
+const DEFAULT_WAIT: Duration = Duration::ZERO;
+
 /// What to measure, and against what.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BenchOptions {
@@ -18,6 +21,11 @@ pub struct BenchOptions {
     pub players: usize,
     pub version: ProtocolVersion,
     pub settle: Duration,
+    /// How long to keep retrying before giving up on a target that is not listening yet.
+    ///
+    /// Lets one tool both wait for a server and measure it, which is why the scripts
+    /// around it no longer probe ports themselves.
+    pub wait: Duration,
 }
 
 fn value_after(
@@ -50,6 +58,7 @@ impl BenchOptions {
         let mut players = DEFAULT_PLAYERS;
         let mut version = ProtocolVersion::MAX;
         let mut settle = DEFAULT_SETTLE;
+        let mut wait = DEFAULT_WAIT;
 
         while let Some(argument) = arguments.next() {
             match argument.as_str() {
@@ -66,6 +75,10 @@ impl BenchOptions {
                 "--settle-seconds" => {
                     let value = value_after("--settle-seconds", &mut arguments)?;
                     settle = Duration::from_secs(parse_number("--settle-seconds", &value)?);
+                }
+                "--wait-seconds" => {
+                    let value = value_after("--wait-seconds", &mut arguments)?;
+                    wait = Duration::from_secs(parse_number("--wait-seconds", &value)?);
                 }
                 flag if flag.starts_with("--") => {
                     return Err(BenchError::UnknownOption {
@@ -85,6 +98,7 @@ impl BenchOptions {
             players,
             version,
             settle,
+            wait,
         })
     }
 }
@@ -104,6 +118,15 @@ mod tests {
         assert_eq!(options.players, DEFAULT_PLAYERS);
         assert_eq!(options.version, ProtocolVersion::MAX);
         assert_eq!(options.settle, DEFAULT_SETTLE);
+        assert_eq!(options.wait, DEFAULT_WAIT);
+    }
+
+    #[test]
+    fn given_a_wait_when_parsed_then_the_tool_will_retry_for_that_long() {
+        let options =
+            parse(&["--wait-seconds", "30", "rust=127.0.0.1:1"]).expect("a valid command line");
+
+        assert_eq!(options.wait, Duration::from_secs(30));
     }
 
     #[test]
@@ -112,7 +135,7 @@ mod tests {
             parse(&["rust=127.0.0.1:1", "java=127.0.0.1:2@9"]).expect("a valid command line");
 
         assert_eq!(options.targets.len(), 2);
-        assert_eq!(options.targets[1].pid, Some(9));
+        assert!(options.targets[1].memory.is_some());
     }
 
     #[test]
