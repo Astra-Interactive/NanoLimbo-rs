@@ -2,7 +2,7 @@ name: Pull Request Check
 on:
   pull_request:
     branches:
-      - 'main'
+      - 'master'
 
 # Explicit least-privilege token permissions so the workflow behaves
 # the same in personal repositories and organizations regardless of

@@ -1,8 +1,8 @@
-name: Release Main
+name: Release master
 on:
   push:
     branches:
-      - main
+      - master
 
 # Explicit least-privilege token permissions so the workflow behaves
 # the same in personal repositories and organizations regardless of
