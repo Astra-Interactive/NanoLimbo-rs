@@ -1,0 +1,18 @@
+[package]
+name = "limbo-config"
+description = "settings.yml: parsing, validation and the default written on first run."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+limbo-text = { path = "../limbo-text" }
+limbo-world = { path = "../limbo-world" }
+serde.workspace = true
+serde_yaml_ng.workspace = true
+thiserror.workspace = true
+
+[lints]
+workspace = true
