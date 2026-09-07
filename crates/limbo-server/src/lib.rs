@@ -5,8 +5,11 @@
 //! consumes it.
 
 pub mod client_intent;
+pub mod connected_player;
 pub mod connection_action;
 pub mod connection_flow;
+pub mod connection_id;
+pub mod connection_registry;
 pub mod forwarding_mode;
 pub mod game_profile;
 pub mod handshake;
