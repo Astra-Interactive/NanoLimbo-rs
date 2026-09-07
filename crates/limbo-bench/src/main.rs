@@ -14,7 +14,12 @@ mod resident_memory;
 mod target_report;
 
 use std::process::ExitCode;
-use std::time::Instant;
+use std::time::{Duration, Instant};
+
+/// How long one player waits for the server to stop sending before calling the join done.
+///
+/// Well below the five-second keep alive, so a keep alive never extends it.
+const JOIN_QUIET_PERIOD: Duration = Duration::from_millis(400);
 
 use crate::bench_options::BenchOptions;
 use crate::bench_target::BenchTarget;
@@ -44,12 +49,20 @@ async fn measure(target: &BenchTarget, options: &BenchOptions) -> TargetReport {
 
     let mut held = Vec::with_capacity(options.players);
     let mut first_failure = None;
+    let mut join_bytes = None;
     let started = Instant::now();
 
     for index in 0..options.players {
         let username = format!("Bench{index}");
         match LoginClient::join(target.address, options.version, &username).await {
-            Ok(client) => held.push(client),
+            Ok(mut client) => {
+                // One player waits out the burst so the join can be sized; the rest would
+                // only measure the same thing again, slowly.
+                if index == 0 {
+                    join_bytes = Some(client.drain_join_burst(JOIN_QUIET_PERIOD).await);
+                }
+                held.push(client);
+            }
             Err(error) => {
                 first_failure = Some(error.to_string());
                 break;
@@ -67,7 +80,7 @@ async fn measure(target: &BenchTarget, options: &BenchOptions) -> TargetReport {
         requested: options.players,
         logged_in: held.len(),
         elapsed,
-        bytes_received: held.iter().map(LoginClient::bytes_received).sum(),
+        join_bytes,
         idle_memory,
         loaded_memory,
         first_failure,

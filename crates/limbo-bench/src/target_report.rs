@@ -8,7 +8,8 @@ pub struct TargetReport {
     pub requested: usize,
     pub logged_in: usize,
     pub elapsed: Duration,
-    pub bytes_received: usize,
+    /// Bytes one player is sent to get into the world, measured to quiescence.
+    pub join_bytes: Option<usize>,
     pub idle_memory: Option<ResidentMemory>,
     pub loaded_memory: Option<ResidentMemory>,
     /// Why players stopped arriving, when not all of them did.
@@ -16,17 +17,6 @@ pub struct TargetReport {
 }
 
 impl TargetReport {
-    /// How much the server sent to get one player into the world.
-    ///
-    /// Worth watching beside memory: a version that suddenly costs far more bytes per
-    /// join usually means a registry is being resent that used to be shared.
-    pub fn bytes_per_player(&self) -> Option<f64> {
-        let players = u32::try_from(self.logged_in)
-            .ok()
-            .filter(|count| *count > 0)?;
-        Some(self.bytes_received as f64 / f64::from(players))
-    }
-
     /// Memory attributable to the players, spread over them.
     ///
     /// `None` when either reading is missing, or when memory went down — which happens on
@@ -63,7 +53,7 @@ fn kilobytes(bytes: Option<f64>) -> String {
 pub fn print_table(reports: &[TargetReport]) {
     println!(
         "\n{:<10} {:>7} {:>7} {:>9} {:>10} {:>11} {:>12} {:>12}",
-        "target", "asked", "joined", "time", "idle", "loaded", "mem/player", "sent/player"
+        "target", "asked", "joined", "time", "idle", "loaded", "mem/player", "join bytes"
     );
     println!("{}", "-".repeat(84));
 
@@ -77,7 +67,7 @@ pub fn print_table(reports: &[TargetReport]) {
             megabytes(report.idle_memory),
             megabytes(report.loaded_memory),
             kilobytes(report.per_player_bytes()),
-            kilobytes(report.bytes_per_player()),
+            kilobytes(report.join_bytes.map(|bytes| bytes as f64)),
         );
     }
 
@@ -102,7 +92,7 @@ mod tests {
             requested: players,
             logged_in: players,
             elapsed: Duration::from_millis(1),
-            bytes_received: 0,
+            join_bytes: None,
             idle_memory: idle.map(|bytes| ResidentMemory { bytes }),
             loaded_memory: loaded.map(|bytes| ResidentMemory { bytes }),
             first_failure: None,
@@ -133,14 +123,5 @@ mod tests {
     #[test]
     fn given_nobody_logged_in_then_dividing_by_them_is_not_attempted() {
         assert_eq!(report(Some(1), Some(2), 0).per_player_bytes(), None);
-        assert_eq!(report(Some(1), Some(2), 0).bytes_per_player(), None);
-    }
-
-    #[test]
-    fn given_bytes_across_several_players_when_divided_then_each_carries_its_share() {
-        let mut measured = report(None, None, 4);
-        measured.bytes_received = 8000;
-
-        assert_eq!(measured.bytes_per_player(), Some(2000.0));
     }
 }
