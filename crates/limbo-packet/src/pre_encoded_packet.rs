@@ -17,7 +17,7 @@ use crate::packet_encode_error::PacketEncodeError;
 /// bytes. This compares content, which cannot be wrong.
 pub struct PreEncodedPacket {
     payloads: HashMap<ProtocolVersion, Bytes>,
-    distinct: HashSet<Bytes>,
+    distinct_payloads: usize,
 }
 
 impl PreEncodedPacket {
@@ -50,7 +50,10 @@ impl PreEncodedPacket {
             payloads.insert(version, shared);
         }
 
-        Ok(Self { payloads, distinct })
+        Ok(Self {
+            payloads,
+            distinct_payloads: distinct.len(),
+        })
     }
 
     /// Encodes for every version the server speaks.
@@ -70,7 +73,7 @@ impl PreEncodedPacket {
     /// How many distinct payloads back this packet, as opposed to how many versions it
     /// covers. Reported at startup, where it says how much the deduplication saved.
     pub fn distinct_payload_count(&self) -> usize {
-        self.distinct.len()
+        self.distinct_payloads
     }
 }
 

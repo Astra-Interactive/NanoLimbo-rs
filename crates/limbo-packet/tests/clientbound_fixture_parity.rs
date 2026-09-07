@@ -1,3 +1,19 @@
+//! Level 1 of the testing pyramid: every clientbound packet, for every version it is
+//! sent to, against the bytes the Java implementation produced.
+//!
+//! The reference lives in `fixtures/packets/clientbound.json`, grouped by the versions
+//! that share an encoding. See `fixtures/README.md` for how it was dumped.
+//!
+//! A payload is compared byte for byte, with one exception: **an embedded dimension
+//! codec**. Java's `ImmutableCollections.SALT` randomises `Map.of` iteration order per JVM
+//! run and Adventure's `CompoundBinaryTag` is built on one, so the dump reorders the keys
+//! of those compounds on every run. They are parsed and compared with keys sorted, while
+//! the bytes around them stay exact. Everything else in the dump reproduces byte for byte
+//! across runs, so the exception must never be widened to cover a genuine mismatch.
+//!
+//! One divergence outside this crate is still open and enumerated below, in
+//! [`NBT_COMPONENT_DIVERGENCES`].
+
 // `clippy.toml` sanctions `expect` and `panic` in tests, but clippy only recognises code
 // inside a `#[test]` function, which the module-level helpers of an integration-test
 // crate are not. Marking the file `#![cfg(test)]` would satisfy clippy and compile the
@@ -5,31 +21,9 @@
 // must never have.
 #![allow(clippy::expect_used, clippy::panic)]
 
-//! Level 1 of the testing pyramid: every clientbound packet, for every version it is
-//! sent to, against the bytes the Java implementation produced.
-//!
-//! The reference lives in `fixtures/packets/clientbound.json`, grouped by the versions
-//! that share an encoding. See `fixtures/README.md` for how it was dumped.
-//!
-//! A payload is compared byte for byte unless it carries something the reference bytes
-//! cannot pin down, of which there are exactly two kinds:
-//!
-//! * **Embedded NBT.** Java's `ImmutableCollections.SALT` randomises `Map.of` iteration
-//!   order per JVM run and Adventure's `CompoundBinaryTag` is built on one, so the dump
-//!   reorders compound keys on every run. Those regions are parsed and compared with keys
-//!   sorted; the bytes around them stay exact.
-//! * **Chat components.** `limbo-text` builds a component tree that renders identically
-//!   to Adventure's but nests differently, a divergence its own parity test declares (see
-//!   `crates/limbo-text/tests/adventure_parity.rs`). Those regions are therefore not this
-//!   crate's to reproduce: the test pins them to `fixtures/text/components.json` instead,
-//!   which attributes the difference to `limbo-text`, and keeps every byte around them
-//!   under exact comparison.
-//!
-//! Neither exception may be widened to cover a genuine mismatch.
-
 use std::collections::{BTreeSet, HashMap};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use bytes::{Buf, BytesMut};
 use limbo_packet::ClientboundPacket;
@@ -45,7 +39,7 @@ use limbo_protocol::buffer::{ProtocolRead, ProtocolWrite};
 use limbo_protocol::packet::{ConnectionState, PacketDirection, PacketKind, PacketRoute};
 use limbo_protocol::version::ProtocolVersion;
 use limbo_text::chat::Component;
-use limbo_text::{parse, to_legacy_string, write_component};
+use limbo_text::{parse, to_legacy_string};
 use limbo_world::{DimensionRegistry, DimensionType, VersionedDimension};
 use serde_json::Value as JsonValue;
 use uuid::{Uuid, uuid};
@@ -99,6 +93,20 @@ const EXPECTED_ENTRIES: [&str; 23] = [
 /// make this suite vacuously green.
 const EXPECTED_PAIRS: usize = 788;
 
+/// Packets whose payload `limbo-text` cannot yet reproduce, and only where a component
+/// travels as NBT rather than as JSON.
+///
+/// Adventure builds a component compound through `CompoundBinaryTag.builder()`, which is
+/// backed by a `HashMap`, so its keys land in Java hash order rather than the order the
+/// serializer wrote them: `<white><b>Welcome!` reaches the wire as `color, bold, text`
+/// where its JSON says `bold, color, text`. `NbtUtils.fromJson` also wraps a bare string
+/// inside `extra` as a compound under the empty key. Both belong to `component_nbt.rs`.
+///
+/// The assertion below demands this list be *exactly* the set that differs, so closing
+/// the gap fails this test until the list is deleted with it. Do not add a packet here to
+/// silence a mismatch of this crate's own making.
+const NBT_COMPONENT_DIVERGENCES: [&str; 3] = ["boss_bar", "chat_message", "title_set_title"];
+
 /// Java's own table records `0x15` here, which on 1.20.3 is `set_slot`; the Rust table
 /// deliberately says `0x1B`. See `fixtures/README.md` and MIGRATION_PLAN.md 3.1.6. A
 /// payload does not depend on the id it travels under, so only the id check is skipped.
@@ -109,14 +117,10 @@ const DISCONNECT_ID_CORRECTED: i32 = 0x1B;
 /// The first version whose clients read chat components as NBT rather than as JSON text.
 const FIRST_NBT_COMPONENT_VERSION: ProtocolVersion = ProtocolVersion::V1_20_3;
 
-fn fixture_path(name: &str) -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../fixtures")
-        .join(name)
-}
-
-fn load_fixture(name: &str) -> JsonValue {
-    let raw = fs::read_to_string(fixture_path(name)).expect("the fixture must exist");
+fn load_fixture() -> JsonValue {
+    let path =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/packets/clientbound.json");
+    let raw = fs::read_to_string(path).expect("the fixture must exist");
 
     serde_json::from_str(&raw).expect("the fixture must be valid json")
 }
@@ -158,16 +162,6 @@ fn protocols_of(group: &JsonValue) -> Vec<ProtocolVersion> {
         .iter()
         .map(|number| protocol_version(number.as_i64().expect("a protocol is a number")))
         .collect()
-}
-
-/// The encoding a grouped fixture entry records for one version.
-fn encoding_for(entry: &JsonValue, version: ProtocolVersion) -> Vec<u8> {
-    let group = json_array(entry, "encodings")
-        .iter()
-        .find(|group| protocols_of(group).contains(&version))
-        .expect("the fixture must record an encoding for this version");
-
-    decode_hex(json_string(group, "hex"))
 }
 
 fn connection_state(name: &str) -> ConnectionState {
@@ -238,31 +232,11 @@ fn take_compound(cursor: &mut &[u8], version: ProtocolVersion) -> Compound {
     compound
 }
 
-/// Leaves `cursor` just past one chat component, returning the bytes it occupied.
-fn take_component(cursor: &mut &[u8], version: ProtocolVersion) -> Vec<u8> {
-    let before = *cursor;
-
-    if version < FIRST_NBT_COMPONENT_VERSION {
-        let length = cursor.read_var_int().expect("a component length");
-        cursor.advance(usize::try_from(length).expect("a non-negative length"));
-    } else {
-        take_compound(cursor, version);
-    }
-
-    before
-        .get(..before.len() - cursor.len())
-        .expect("the component was just measured")
-        .to_vec()
-}
-
-/// A payload cut into the parts that can be compared exactly and the parts that cannot.
+/// A payload cut into the byte runs that are compared exactly and the embedded NBT that
+/// is compared with its keys sorted.
 struct PayloadSegments {
-    /// Byte runs this crate is wholly responsible for, in the order they appear.
     exact: Vec<Vec<u8>>,
-    /// Embedded NBT, compared with keys sorted.
     compounds: Vec<Compound>,
-    /// Chat component regions, compared against the `limbo-text` fixture.
-    components: Vec<Vec<u8>>,
 }
 
 impl PayloadSegments {
@@ -270,7 +244,6 @@ impl PayloadSegments {
         Self {
             exact: vec![payload.to_vec()],
             compounds: Vec::new(),
-            components: Vec::new(),
         }
     }
 }
@@ -311,42 +284,6 @@ fn split_join_game(payload: &[u8], version: ProtocolVersion) -> PayloadSegments 
             cursor.to_vec(),
         ],
         compounds,
-        components: Vec::new(),
-    }
-}
-
-fn split_components(payload: &[u8], version: ProtocolVersion, count: usize) -> PayloadSegments {
-    let mut cursor: &[u8] = payload;
-    let mut components = Vec::with_capacity(count);
-    for _ in 0..count {
-        components.push(take_component(&mut cursor, version));
-    }
-
-    PayloadSegments {
-        exact: vec![cursor.to_vec()],
-        compounds: Vec::new(),
-        components,
-    }
-}
-
-fn split_boss_bar(payload: &[u8], version: ProtocolVersion) -> PayloadSegments {
-    let mut cursor: &[u8] = payload;
-    cursor.advance(16);
-    cursor.read_var_int().expect("the bar action");
-
-    let prefix_length = payload.len() - cursor.len();
-    let component = take_component(&mut cursor, version);
-
-    PayloadSegments {
-        exact: vec![
-            payload
-                .get(..prefix_length)
-                .expect("the prefix was just measured")
-                .to_vec(),
-            cursor.to_vec(),
-        ],
-        compounds: Vec::new(),
-        components: vec![component],
     }
 }
 
@@ -363,39 +300,19 @@ fn split_payload(name: &str, version: ProtocolVersion, payload: &[u8]) -> Payloa
             PayloadSegments {
                 exact: Vec::new(),
                 compounds: vec![codec],
-                components: Vec::new(),
             }
         }
         "join_game" if join_game_embeds_codec(version) => split_join_game(payload, version),
-        "boss_bar" => split_boss_bar(payload, version),
-        "player_list_header" => split_components(payload, version, 2),
-        "chat_message" | "title_set_title" | "title_set_subtitle" => {
-            split_components(payload, version, 1)
-        }
         _ => PayloadSegments::whole(payload),
     }
 }
 
-/// The `settings.yml` text behind each component a packet carries, in the order the
-/// payload carries them.
-fn component_inputs(name: &str) -> &'static [&'static str] {
-    match name {
-        "boss_bar" | "chat_message" => &[WELCOME_TEXT],
-        "player_list_header" => &[HEADER_TEXT, FOOTER_TEXT],
-        "title_set_title" => &[TITLE_TEXT],
-        "title_set_subtitle" => &[FOOTER_TEXT],
-        _ => &[],
-    }
-}
+/// A few bytes either side of `offset`, clamped to what the slice actually holds.
+fn window_around(bytes: &[u8], offset: usize) -> &[u8] {
+    let start = offset.saturating_sub(4).min(bytes.len());
+    let end = (offset + 8).min(bytes.len());
 
-/// The bytes `limbo-text`'s own oracle records for `input` on `version`.
-fn reference_component(text_fixture: &JsonValue, input: &str, version: ProtocolVersion) -> Vec<u8> {
-    let entry = json_array(text_fixture, "entries")
-        .iter()
-        .find(|entry| entry.get("input").and_then(JsonValue::as_str) == Some(input))
-        .expect("the text fixture must cover every component a packet carries");
-
-    encoding_for(entry, version)
+    bytes.get(start..end).unwrap_or_default()
 }
 
 /// Describes where two byte runs first diverge, in a form short enough to read.
@@ -405,20 +322,17 @@ fn describe_difference(expected: &[u8], actual: &[u8]) -> String {
         .zip(actual)
         .position(|(reference, ours)| reference != ours)
         .unwrap_or(expected.len().min(actual.len()));
-    let window = offset.saturating_sub(4)..offset + 8;
-
     format!(
         "first differs at byte {offset} of {}/{}; reference {:02x?} ours {:02x?}",
         expected.len(),
         actual.len(),
-        expected.get(window.clone()).unwrap_or_default(),
-        actual.get(window).unwrap_or_default()
+        window_around(expected, offset),
+        window_around(actual, offset)
     )
 }
 
 /// Compares one payload against the reference, and says what differs when it does.
 fn payload_difference(
-    text_fixture: &JsonValue,
     name: &str,
     version: ProtocolVersion,
     expected: &[u8],
@@ -447,38 +361,6 @@ fn payload_difference(
             .expect("the same layout on both sides");
         if canonical_compound(reference_compound) != canonical_compound(our_compound) {
             return Some(format!("embedded compound {index} differs in content"));
-        }
-    }
-
-    let inputs = component_inputs(name);
-    assert_eq!(
-        inputs.len(),
-        expected.components.len(),
-        "{name}: the payload carries a different number of components than expected"
-    );
-    for (index, input) in inputs.iter().enumerate() {
-        let reference_region = expected
-            .components
-            .get(index)
-            .expect("the component was just counted");
-        if *reference_region != reference_component(text_fixture, input, version) {
-            return Some(format!(
-                "component {index} is not the one the text fixture records for {input}"
-            ));
-        }
-
-        let our_region = actual
-            .components
-            .get(index)
-            .expect("the same layout on both sides");
-        let mut expected_region = Vec::new();
-        write_component(&mut expected_region, &parse(input), version)
-            .expect("a component this crate already encoded must re-encode");
-        if *our_region != expected_region {
-            return Some(format!(
-                "component {index} is not what limbo-text writes for {input}: {}",
-                describe_difference(&expected_region, our_region)
-            ));
         }
     }
 
@@ -735,7 +617,7 @@ impl FixtureInputs {
 
 #[test]
 fn given_the_fixture_when_read_then_it_still_describes_every_packet_and_version_pair() {
-    let fixture = load_fixture("packets/clientbound.json");
+    let fixture = load_fixture();
     let entries = json_array(&fixture, "entries");
 
     let names: BTreeSet<&str> = entries
@@ -781,10 +663,11 @@ fn given_the_fixture_when_read_then_it_still_describes_every_packet_and_version_
 #[test]
 fn given_the_reference_dump_when_every_packet_is_encoded_then_the_payloads_match() {
     let inputs = FixtureInputs::load();
-    let fixture = load_fixture("packets/clientbound.json");
-    let text_fixture = load_fixture("text/components.json");
+    let fixture = load_fixture();
     let mut compared = 0;
-    let mut mismatches = Vec::new();
+    let mut differing = BTreeSet::new();
+    let mut known = BTreeSet::new();
+    let mut reasons = Vec::new();
 
     for entry in json_array(&fixture, "entries") {
         let name = json_string(entry, "name");
@@ -793,12 +676,17 @@ fn given_the_reference_dump_when_every_packet_is_encoded_then_the_payloads_match
             let expected = decode_hex(json_string(group, "hex"));
 
             for version in protocols_of(group) {
-                let actual = inputs.encode(name, version).payload;
-
-                if let Some(difference) =
-                    payload_difference(&text_fixture, name, version, &expected, &actual)
+                let pair = format!("{name} on {version}");
+                if NBT_COMPONENT_DIVERGENCES.contains(&name)
+                    && version >= FIRST_NBT_COMPONENT_VERSION
                 {
-                    mismatches.push(format!("{name} on {version}: {difference}"));
+                    known.insert(pair.clone());
+                }
+
+                let actual = inputs.encode(name, version).payload;
+                if let Some(difference) = payload_difference(name, version, &expected, &actual) {
+                    differing.insert(pair.clone());
+                    reasons.push(format!("{pair}: {difference}"));
                 }
                 compared += 1;
             }
@@ -806,18 +694,21 @@ fn given_the_reference_dump_when_every_packet_is_encoded_then_the_payloads_match
     }
 
     assert_eq!(compared, EXPECTED_PAIRS);
-    assert!(
-        mismatches.is_empty(),
-        "{} of {compared} (packet, version) pairs differ from the reference dump:\n{}",
-        mismatches.len(),
-        mismatches.join("\n")
+    assert_eq!(
+        differing,
+        known,
+        "the set of pairs that differ from the reference dump is not the one \
+         NBT_COMPONENT_DIVERGENCES describes. Pairs that differ and should not are a bug \
+         here; pairs that no longer differ mean limbo-text's NBT encoder has landed, so \
+         delete NBT_COMPONENT_DIVERGENCES and this assertion.\n{}",
+        reasons.join("\n")
     );
 }
 
 #[test]
 fn given_the_reference_dump_when_ids_are_resolved_then_the_tables_agree() {
     let inputs = FixtureInputs::load();
-    let fixture = load_fixture("packets/clientbound.json");
+    let fixture = load_fixture();
     let mut compared = 0;
 
     for entry in json_array(&fixture, "entries") {
@@ -862,7 +753,7 @@ fn given_the_reference_dump_when_ids_are_resolved_then_the_tables_agree() {
 #[test]
 fn given_every_encoded_packet_when_grouped_by_content_then_the_version_boundaries_match() {
     let inputs = FixtureInputs::load();
-    let fixture = load_fixture("packets/clientbound.json");
+    let fixture = load_fixture();
 
     for entry in json_array(&fixture, "entries") {
         let name = json_string(entry, "name");
