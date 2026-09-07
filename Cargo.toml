@@ -3,11 +3,11 @@ resolver = "3"
 members = ["crates/*"]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.93"
 license = "GPL-3.0-or-later"
-repository = "https://github.com/Nan1t/NanoLimbo"
+repository = "https://github.com/Astra-Interactive/NanoLimbo-rs"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
