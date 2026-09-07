@@ -1,6 +1,7 @@
 use std::fmt;
 
 use serde_json::Value;
+use subtle::{Choice, ConstantTimeEq};
 
 use crate::forwarding::bungee_guard_forwarding_error::BungeeGuardForwardingError;
 use crate::forwarding::forwarded_identity::ForwardedIdentity;
@@ -9,6 +10,17 @@ use crate::identity::parse_uuid;
 
 /// Name of the profile property BungeeGuard hides its token in.
 const TOKEN_PROPERTY: &str = "bungeeguard-token";
+
+/// Compares two byte strings in time that does not depend on where they differ.
+///
+/// Lengths are compared first and cannot be hidden — they are not secret, and every
+/// deployment's tokens are a fixed length anyway.
+fn constant_time_equals(left: &[u8], right: &[u8]) -> Choice {
+    if left.len() != right.len() {
+        return Choice::from(0_u8);
+    }
+    left.ct_eq(right)
+}
 
 /// Checks the shared token BungeeGuard smuggles through the forwarded properties.
 ///
@@ -42,6 +54,23 @@ impl BungeeGuardVerifier {
             .ok_or(BungeeGuardForwardingError::MissingToken)
     }
 
+    /// Whether any configured token matches, compared without leaking where it differs.
+    ///
+    /// The token is a shared secret checked against attacker-supplied input, so a
+    /// byte-by-byte comparison that returns early would let a caller recover it one
+    /// character at a time. Upstream uses `List.contains`, which does exactly that —
+    /// even though the Velocity path beside it correctly uses `MessageDigest.isEqual`.
+    /// Every configured token is examined, so the timing does not reveal which one, or
+    /// how many, matched. See MIGRATION_PLAN.md section 3.1b.
+    fn accepts(&self, offered: &str) -> bool {
+        self.tokens
+            .iter()
+            .fold(Choice::from(0_u8), |matched, configured| {
+                matched | constant_time_equals(configured.as_bytes(), offered.as_bytes())
+            })
+            .into()
+    }
+
     /// Reads the identity out of a handshake host and accepts it only if the token
     /// travelling with it is one of the configured ones.
     pub fn verify(&self, host: &str) -> Result<ForwardedIdentity, BungeeGuardForwardingError> {
@@ -57,11 +86,7 @@ impl BungeeGuardVerifier {
             .map_err(|_invalid_json| BungeeGuardForwardingError::MalformedProperties)?;
         let token = Self::find_token(&properties)?;
 
-        if !self
-            .tokens
-            .iter()
-            .any(|configured| configured.as_str() == token)
-        {
+        if !self.accepts(token) {
             return Err(BungeeGuardForwardingError::UnknownToken);
         }
 

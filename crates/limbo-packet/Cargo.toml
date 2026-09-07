@@ -1,6 +1,6 @@
 [package]
-name = "limbo-net"
-description = "Network primitives: varint framing, traffic limits and player info forwarding."
+name = "limbo-packet"
+description = "Clientbound packet encoders and per-version pre-encoded payloads."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,15 +9,16 @@ repository.workspace = true
 
 [dependencies]
 bytes.workspace = true
-hmac.workspace = true
 limbo-protocol = { path = "../limbo-protocol" }
-md-5.workspace = true
+limbo-text = { path = "../limbo-text" }
+limbo-world = { path = "../limbo-world" }
 serde_json.workspace = true
-sha2.workspace = true
-subtle.workspace = true
 thiserror.workspace = true
-tokio-util.workspace = true
 uuid.workspace = true
+valence_nbt.workspace = true
+
+[dev-dependencies]
+sha2 = "0.10"
 
 [lints]
 workspace = true
