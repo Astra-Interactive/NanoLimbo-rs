@@ -1,0 +1,83 @@
+name: "build-java-wrapper"
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  # The jar carries the server inside it: the five shared libraries built by
+  # build-release-artifacts go into the resources the wrapper unpacks and loads at
+  # runtime, so this job only produces something usable once that one has finished. A
+  # called workflow cannot declare that itself - the caller orders it, and
+  # release-main.yml is where the dependency is written down.
+  build_java_wrapper:
+    name: Build the Java wrapper jar
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: java-wrapper
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # 21 rather than the newest release: it is the version Paper, Velocity and the
+      # rest of the ecosystem this jar plugs into currently require.
+      - name: Set up Java
+        uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      # One download per platform, and the destination directory is the contract: the
+      # wrapper resolves the library to load from the operating system and architecture
+      # it finds itself on, so a library filed under the wrong directory is a wrapper
+      # that works everywhere except where it matters. Paths are relative to the
+      # workspace rather than to java-wrapper, because `working-directory` does not
+      # apply to an action's own inputs.
+      - name: Download the Linux x86_64 library
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: lib-linux-x86_64
+          path: java-wrapper/wrapper/src/main/resources/linux/x86_64
+
+      - name: Download the Linux aarch64 library
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: lib-linux-aarch64
+          path: java-wrapper/wrapper/src/main/resources/linux/aarch64
+
+      - name: Download the macOS aarch64 library
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: lib-macos-aarch64
+          path: java-wrapper/wrapper/src/main/resources/macos/aarch64
+
+      - name: Download the macOS x86_64 library
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: lib-macos-x86_64
+          path: java-wrapper/wrapper/src/main/resources/macos/x86_64
+
+      - name: Download the Windows x86_64 library
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: lib-windows-x86_64
+          path: java-wrapper/wrapper/src/main/resources/windows/x86_64
+
+      # The executable bit on gradlew does not survive every checkout, and a wrapper
+      # that cannot be executed fails in a way that reads like a missing file.
+      - name: Build the wrapper jar
+        run: |
+          chmod +x gradlew
+          ./gradlew build
+
+      # Named to match the archives so the release job can collect everything it
+      # publishes with one pattern.
+      - name: Upload the wrapper jar
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: nanolimbo_java_wrapper
+          path: java-wrapper/wrapper/build/libs/nanolimbo_java_wrapper.jar
+          if-no-files-found: error

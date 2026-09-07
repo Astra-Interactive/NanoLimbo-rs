@@ -38,11 +38,26 @@ jobs:
       contents: read
       packages: write
     uses: ./.github/workflows/call-upload-docker-registry.yml
-  # Last, and only if the image is up: the tag is what tells people a release happened,
-  # so it should not exist for a version nobody can pull.
+  # Alongside the image rather than after it: the seven cross-compiled targets are the
+  # longest part of a release by some distance, and nothing about them depends on the
+  # image being published.
+  build_release_artifacts:
+    name: Build release artifacts
+    needs: [ clippy_validation, tests_validation ]
+    uses: ./.github/workflows/call-build-release-artifacts.yml
+  # The jar embeds the shared libraries the matrix above produced, so it can only be
+  # assembled once they exist.
+  build_java_wrapper:
+    name: Build Java wrapper
+    needs: [ build_release_artifacts ]
+    uses: ./.github/workflows/call-build-java-wrapper.yml
+  # Last, and only if the image is up and every asset exists: the tag is what tells
+  # people a release happened, so it should not exist for a version nobody can pull, and
+  # a release whose downloads are missing is read as a broken release rather than as an
+  # unfinished one.
   upload_github_release:
     name: Upload GitHub release
-    needs: [ upload_docker_registry ]
+    needs: [ upload_docker_registry, build_release_artifacts, build_java_wrapper ]
     permissions:
       contents: write
     uses: ./.github/workflows/call-upload-github-release.yml

@@ -1,0 +1,197 @@
+name: "build-release-artifacts"
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# Pinned as a pair. cargo-zigbuild translates the arguments it hands to zig, and zig
+# still changes those between releases, so a zig it has not been taught about is the
+# usual way this stops working. Bump both together or neither.
+env:
+  ZIG_VERSION: "0.14.1"
+  CARGO_ZIGBUILD_VERSION: "0.23.0"
+
+jobs:
+  # The `archive` and `library_artifact` names are a contract rather than a convention:
+  # the Pterodactyl egg fetches an archive by name and unpacks it straight into the
+  # server directory, and the Java wrapper packs the libraries by artifact name into the
+  # resources the JVM later loads them from. Renaming a row here breaks something that
+  # is not in this repository.
+  #
+  # The library is built only where the wrapper looks for one, and the wrapper files its
+  # resources by operating system and architecture, not by libc. The musl rows are for
+  # containers and for hosts the glibc archives cannot serve; nothing loads a library
+  # from them.
+  build_release_artifacts:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-musl
+            build_target: x86_64-unknown-linux-musl
+            cargo_command: cargo build
+            libc: musl
+            runner: ubuntu-latest
+            asset: nanolimbo_linux-x86_64-musl
+            archive: nanolimbo_linux-x86_64-musl.tar.gz
+          - target: aarch64-unknown-linux-musl
+            build_target: aarch64-unknown-linux-musl
+            cargo_command: cargo build
+            libc: musl
+            # Free for public repositories, and native: the release profile builds with
+            # fat LTO and one codegen unit, which under emulation turns minutes into
+            # the better part of an hour.
+            runner: ubuntu-24.04-arm
+            asset: nanolimbo_linux-aarch64-musl
+            archive: nanolimbo_linux-aarch64-musl.tar.gz
+          - target: x86_64-unknown-linux-gnu
+            build_target: x86_64-unknown-linux-gnu.2.28
+            cargo_command: cargo zigbuild
+            zig_arch: x86_64
+            runner: ubuntu-latest
+            asset: nanolimbo_linux-x86_64-gnu
+            archive: nanolimbo_linux-x86_64-gnu.tar.gz
+            library_artifact: lib-linux-x86_64
+            library_file: libnanolimbo_lib.so
+          - target: aarch64-unknown-linux-gnu
+            build_target: aarch64-unknown-linux-gnu.2.28
+            cargo_command: cargo zigbuild
+            zig_arch: aarch64
+            runner: ubuntu-24.04-arm
+            asset: nanolimbo_linux-aarch64-gnu
+            archive: nanolimbo_linux-aarch64-gnu.tar.gz
+            library_artifact: lib-linux-aarch64
+            library_file: libnanolimbo_lib.so
+          - target: aarch64-apple-darwin
+            build_target: aarch64-apple-darwin
+            cargo_command: cargo build
+            runner: macos-latest
+            asset: nanolimbo_macos-aarch64
+            archive: nanolimbo_macos-aarch64.tar.gz
+            library_artifact: lib-macos-aarch64
+            library_file: libnanolimbo_lib.dylib
+          # Cross-compiled from the arm64 runner, which is what macos-latest now is. The
+          # Apple toolchain carries both architectures, so this needs no more than the
+          # rustup target - and Intel Macs are still where a good share of plugin
+          # developers run a test server.
+          - target: x86_64-apple-darwin
+            build_target: x86_64-apple-darwin
+            cargo_command: cargo build
+            runner: macos-latest
+            asset: nanolimbo_macos-x86_64
+            archive: nanolimbo_macos-x86_64.tar.gz
+            library_artifact: lib-macos-x86_64
+            library_file: libnanolimbo_lib.dylib
+          - target: x86_64-pc-windows-msvc
+            build_target: x86_64-pc-windows-msvc
+            cargo_command: cargo build
+            runner: windows-latest
+            asset: nanolimbo_windows-x86_64
+            archive: nanolimbo_windows-x86_64.zip
+            library_artifact: lib-windows-x86_64
+            library_file: nanolimbo_lib.dll
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+        with:
+          # One cache entry per target. Without this the seven jobs share a single entry
+          # and spend the run overwriting each other's dependency artifacts with the
+          # ones built for a different triple.
+          cache-key: ${{ matrix.target }}
+
+      - name: Install the Rust target
+        run: rustup target add ${{ matrix.target }}
+
+      # For the same reason the Dockerfile installs musl-dev: these two targets link
+      # against musl rather than the runner's glibc. Every dependency in the workspace
+      # is pure Rust, so this is the only extra tooling the archives need.
+      - name: Install the musl toolchain
+        if: matrix.libc == 'musl'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y musl-tools
+
+      # The glibc targets are linked against 2.28 instead of the runner's much newer
+      # version. glibc is backward compatible but not forward compatible, so a binary
+      # built on Ubuntu 24.04 refuses to start on Debian 11, RHEL 8 or any container
+      # built on them - all of them ordinary places to find a Minecraft server, and the
+      # shared library has no say in which JVM it is loaded into. zig carries the older
+      # headers and stubs that make an older target reachable; cargo-zigbuild is the
+      # shim that puts them behind cargo. The musl archives above need none of this:
+      # they carry their libc with them.
+      - name: Install Zig
+        if: matrix.zig_arch != ''
+        env:
+          ZIG_ARCH: ${{ matrix.zig_arch }}
+        run: |
+          curl -fsSLO "https://ziglang.org/download/${ZIG_VERSION}/zig-${ZIG_ARCH}-linux-${ZIG_VERSION}.tar.xz"
+          tar -xf "zig-${ZIG_ARCH}-linux-${ZIG_VERSION}.tar.xz"
+          echo "${PWD}/zig-${ZIG_ARCH}-linux-${ZIG_VERSION}" >> "$GITHUB_PATH"
+
+      - name: Install cargo-zigbuild
+        if: matrix.zig_arch != ''
+        run: cargo install cargo-zigbuild --locked --version "${CARGO_ZIGBUILD_VERSION}"
+
+      # --locked, as everywhere else: an artifact is only worth publishing if it was
+      # built from the dependency tree the tests ran against. `build_target` rather than
+      # `target` because the glibc rows carry their minimum version in the triple, which
+      # is how cargo-zigbuild is told which one to link against.
+      - name: Build the server binary
+        run: ${{ matrix.cargo_command }} --release --locked --target ${{ matrix.build_target }} --bin nanolimbo
+
+      # A second invocation rather than `--bin nanolimbo --lib`: the library belongs to
+      # one package, and naming it here keeps the two outputs independent of whichever
+      # other workspace crates happen to expose a lib target.
+      - name: Build the shared library
+        if: matrix.library_artifact != ''
+        run: ${{ matrix.cargo_command }} --release --locked --target ${{ matrix.build_target }} --package limbo-ffi --lib
+
+      # The archive holds the bare binary and nothing else. The Pterodactyl installer
+      # unpacks it directly into the server directory, where a wrapping folder would
+      # leave the egg looking for a binary that is one level down from where it looks.
+      # cargo-zigbuild drops the glibc suffix again on the way out, so the release
+      # directory is always the plain triple.
+      - name: Pack the tarball
+        if: runner.os != 'Windows'
+        env:
+          ARCHIVE: ${{ matrix.archive }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          mkdir -p artifacts
+          cp "target/${TARGET}/release/nanolimbo" artifacts/
+          cd artifacts && tar -czf "../${ARCHIVE}" nanolimbo
+
+      - name: Pack the zip
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          ARCHIVE: ${{ matrix.archive }}
+          TARGET: ${{ matrix.target }}
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          Copy-Item "target/$env:TARGET/release/nanolimbo.exe" artifacts/
+          Compress-Archive -Path artifacts/* -DestinationPath "$env:ARCHIVE" -Force
+
+      - name: Upload the binary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.archive }}
+          if-no-files-found: error
+
+      # Kept for a day because nothing outside this run reads them: the wrapper build
+      # downstream embeds them in the jar, and the jar is what is released.
+      - name: Upload the shared library
+        if: matrix.library_artifact != ''
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ matrix.library_artifact }}
+          path: target/${{ matrix.target }}/release/${{ matrix.library_file }}
+          if-no-files-found: error
+          retention-days: 1

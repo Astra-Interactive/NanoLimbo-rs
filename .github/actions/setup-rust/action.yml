@@ -1,5 +1,10 @@
 name: "setup-rust"
 description: "Installs the toolchain pinned by rust-toolchain.toml and restores the cargo cache"
+inputs:
+  cache-key:
+    description: "Extra value folded into the cargo cache key. Jobs that build for different targets must pass one, or they share an entry and overwrite each other's dependency artifacts."
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -14,3 +19,5 @@ runs:
         cargo --version
     - name: Restore the cargo cache
       uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+      with:
+        key: ${{ inputs.cache-key }}

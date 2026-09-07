@@ -54,3 +54,12 @@ jobs:
     name: Validate container image
     needs: [ lockfile_validation, clippy_validation, tests_validation ]
     uses: ./.github/workflows/call-docker-image-validation.yml
+  # The one check with nothing to say about Cargo, so it does not queue behind the
+  # lockfile validation the Rust jobs hang off. The release-target matrix is deliberately
+  # not repeated here: `cargo build --workspace` in build_project already compiles the
+  # FFI crate's shared library for the host, and clippy already lints it, so seven
+  # cross-compiled release builds would add half an hour to a pull request to prove
+  # something a linker on the release run proves anyway.
+  java_wrapper_validation:
+    name: Validate Java wrapper
+    uses: ./.github/workflows/call-java-wrapper-validation.yml
