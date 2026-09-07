@@ -1,0 +1,16 @@
+name: "setup-rust"
+description: "Installs the toolchain pinned by rust-toolchain.toml and restores the cargo cache"
+runs:
+  using: "composite"
+  steps:
+    # rust-toolchain.toml pins the channel and the components, but rustup only acts on it
+    # when something asks it to. Doing it here means the version is decided by the
+    # repository rather than by whatever the runner image happens to ship this week.
+    - name: Install the pinned toolchain
+      shell: bash
+      run: |
+        rustup show active-toolchain || rustup toolchain install
+        rustc --version
+        cargo --version
+    - name: Restore the cargo cache
+      uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2

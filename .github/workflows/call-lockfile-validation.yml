@@ -1,0 +1,21 @@
+name: "lockfile-validation"
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  lockfile_validation:
+    name: Validate Cargo.lock
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+      # Every other job, and the Dockerfile, builds with --locked. Resolving the graph
+      # here first means a lockfile that no longer matches the manifests is reported as
+      # exactly that, once, instead of as a puzzling failure part-way through a release.
+      - name: Check Cargo.lock matches the manifests
+        run: cargo metadata --locked --format-version 1 > /dev/null

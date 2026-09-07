@@ -1,0 +1,42 @@
+name: "upload-github-release"
+on:
+  workflow_call:
+    secrets:
+      ACTIONS_TOKEN:
+        description: "Optional personal access token used to create the release. Falls back to the default GITHUB_TOKEN when not provided."
+        required: false
+
+# `contents: write` is required to create a release with the default GITHUB_TOKEN.
+# The caller job must grant the same permission.
+permissions:
+  contents: write
+
+jobs:
+  upload_github_release:
+    name: Upload GitHub release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Read project version
+        id: version
+        uses: ./.github/actions/read-version
+        with:
+          manifest-path: './Cargo.toml'
+
+      # No `files`: what is released is the source at this tag, which GitHub attaches
+      # itself as the generated zip and tarball. Builds are distributed as the container
+      # image published alongside this job, so there is nothing here to keep in step with
+      # it - and no binary whose provenance would have to be explained separately.
+      - name: Create GitHub release
+        id: create_github_release
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN || github.token }}
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ github.event.repository.name }} - ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false

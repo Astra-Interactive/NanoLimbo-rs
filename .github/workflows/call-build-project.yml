@@ -1,0 +1,21 @@
+name: "build-project"
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build_project:
+    name: Build the release binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+      # The release profile, not the debug one: fat LTO and `panic = "abort"` change what
+      # compiles, so a pull request fails here rather than when the image is built. Tests
+      # and clippy run in their own jobs, so there is nothing to repeat here.
+      - name: Release build
+        run: cargo build --workspace --release --locked
