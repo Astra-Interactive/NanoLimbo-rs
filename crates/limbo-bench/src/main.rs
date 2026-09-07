@@ -10,6 +10,7 @@ mod bench_error;
 mod bench_options;
 mod bench_target;
 mod login_client;
+mod memory_source;
 mod resident_memory;
 mod target_report;
 
@@ -33,11 +34,37 @@ usage: limbo-bench [options] <name=address[@pid]>...
   --protocol N          protocol number to connect as (default: the newest supported)
   --settle-seconds N    how long to hold them before reading memory (default 2)
 
-Give a process id after @ to have memory reported for that server. Without one the
-server is still load-tested; only its memory goes unmeasured.
+After @ give a process id, or a container name to read the whole container with
+docker stats. Without one the server is still load-tested; only its memory goes
+unmeasured. Do not mix the two in one run: a container figure includes more than a
+process figure does.
 
   limbo-bench rust=127.0.0.1:25565@1234 java=127.0.0.1:25577@5678
+  limbo-bench --players 300 rust=127.0.0.1:25565@nanolimbo-1
 ";
+
+/// Waits until the server can actually serve a player, or the deadline passes.
+///
+/// Readiness is a completed login, not an accepted socket. Docker's port forwarder
+/// accepts a connection before the container behind it is listening and then resets it,
+/// so a connect-only probe reports ready too early; a shell probing `/dev/tcp` through
+/// the same forwarder reports the opposite. Only joining proves the server is serving.
+///
+/// The probe player is dropped again before anything is measured, so it does not show up
+/// in the idle reading.
+async fn wait_until_serving(target: &BenchTarget, options: &BenchOptions) -> bool {
+    let deadline = Instant::now() + options.wait;
+
+    loop {
+        match LoginClient::join(target.address, options.version, "Probe").await {
+            Ok(_probe) => return true,
+            Err(_not_yet) if Instant::now() < deadline => {
+                tokio::time::sleep(Duration::from_millis(200)).await;
+            }
+            Err(_gave_up) => return false,
+        }
+    }
+}
 
 /// Logs players in one at a time and reports how far it got.
 ///
@@ -45,7 +72,10 @@ server is still load-tested; only its memory goes unmeasured.
 /// sockets as much as anything the server does, and the figure of interest here is what
 /// the server holds once they are all in, not how quickly they arrive.
 async fn measure(target: &BenchTarget, options: &BenchOptions) -> TargetReport {
-    let idle_memory = target.pid.and_then(resident_memory::of_process);
+    if !wait_until_serving(target, options).await {
+        return TargetReport::unreachable(target, options.players);
+    }
+    let idle_memory = target.memory.as_ref().and_then(resident_memory::of_source);
 
     let mut held = Vec::with_capacity(options.players);
     let mut first_failure = None;
@@ -73,7 +103,7 @@ async fn measure(target: &BenchTarget, options: &BenchOptions) -> TargetReport {
 
     // Let the server finish whatever the arrival burst started before reading memory.
     tokio::time::sleep(options.settle).await;
-    let loaded_memory = target.pid.and_then(resident_memory::of_process);
+    let loaded_memory = target.memory.as_ref().and_then(resident_memory::of_source);
 
     TargetReport {
         name: target.name.clone(),
@@ -87,7 +117,12 @@ async fn measure(target: &BenchTarget, options: &BenchOptions) -> TargetReport {
     }
 }
 
-async fn run(options: BenchOptions) {
+/// Returns whether every target served at least one player.
+///
+/// A target that served nobody is a failure worth an exit code: this doubles as the
+/// readiness-and-smoke check for a freshly built container, and a script needs to be able
+/// to tell. Serving fewer than asked is not a failure — a player cap is a setting.
+async fn run(options: BenchOptions) -> bool {
     println!(
         "logging in {} players as protocol {} ({})",
         options.players,
@@ -102,6 +137,7 @@ async fn run(options: BenchOptions) {
     }
 
     print_table(&reports);
+    reports.iter().all(|report| report.logged_in > 0)
 }
 
 fn main() -> ExitCode {
@@ -121,6 +157,8 @@ fn main() -> ExitCode {
         }
     };
 
-    runtime.block_on(run(options));
-    ExitCode::SUCCESS
+    match runtime.block_on(run(options)) {
+        true => ExitCode::SUCCESS,
+        false => ExitCode::FAILURE,
+    }
 }

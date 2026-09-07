@@ -59,10 +59,22 @@ Given a jar it starts both on the same configuration, logs the players in and re
 servers' memory from one place at one moment:
 
 ```
-target       asked  joined      time       idle      loaded   mem/player  sent/player
+target       asked  joined      time       idle      loaded   mem/player   join bytes
 ------------------------------------------------------------------------------------
-rust           200     200     0.07s    22.7 MB     34.9 MB      62.5 KB     153.4 KB
-java           200     200     0.19s   118.6 MB    159.3 MB     208.3 KB     153.4 KB
+rust           300     300     0.88s      3.9 MB     20.7 MB      57.3 KB     159.0 KB
+java           300     300     0.94s    162.5 MB    201.8 MB     134.1 KB     159.0 KB
+```
+
+Those are containers, which is where this runs. Measured natively on macOS the same
+server reports 22.7 MB idle instead of 3.9 — almost all of it platform overhead rather
+than anything the server allocates. Measure on the platform you deploy to.
+
+To measure a container rather than a process, name it after the `@` instead of a pid:
+
+```sh
+docker compose up -d
+cargo run --release --bin limbo-bench -- --players 300 \
+  server=127.0.0.1:25565@$(docker compose ps --format '{{.Name}}' | head -1)
 ```
 
 Upstream lives in its own repository, so its jar is pointed at rather than assumed:

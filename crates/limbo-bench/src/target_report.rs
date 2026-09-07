@@ -17,6 +17,20 @@ pub struct TargetReport {
 }
 
 impl TargetReport {
+    /// A server that never accepted a connection, so nothing about it was measured.
+    pub fn unreachable(target: &crate::bench_target::BenchTarget, requested: usize) -> Self {
+        Self {
+            name: target.name.clone(),
+            requested,
+            logged_in: 0,
+            elapsed: Duration::ZERO,
+            join_bytes: None,
+            idle_memory: None,
+            loaded_memory: None,
+            first_failure: Some(format!("{} never served a player", target.address)),
+        }
+    }
+
     /// Memory attributable to the players, spread over them.
     ///
     /// `None` when either reading is missing, or when memory went down — which happens on

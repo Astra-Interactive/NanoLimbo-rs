@@ -64,27 +64,12 @@ prepare_config() {
         "$settings" > "$dir/settings.yml"
 }
 
-wait_for_port() {
-    local port="$1" name="$2"
-    for _ in $(seq 1 100); do
-        if (exec 3<>"/dev/tcp/127.0.0.1/$port") 2>/dev/null; then
-            exec 3>&- 3<&-
-            return 0
-        fi
-        sleep 0.2
-    done
-    echo "$name did not start listening on port $port; see $work/$name.log" >&2
-    return 1
-}
-
 echo "building the release binaries..."
 cargo build --release --quiet --manifest-path "$root/Cargo.toml"
 
 prepare_config "$work/rust" "$rust_port"
 (cd "$work/rust" && exec "$root/target/release/nanolimbo") > "$work/rust.log" 2>&1 &
 rust_pid=$!
-wait_for_port "$rust_port" rust
-
 targets=("rust=127.0.0.1:$rust_port@$rust_pid")
 
 # Each server runs from its own working directory, so a path relative to the caller's
@@ -97,7 +82,6 @@ if [ -n "$jar" ] && [ -f "$jar" ]; then
     prepare_config "$work/java" "$java_port"
     (cd "$work/java" && exec java -jar "$jar") > "$work/java.log" 2>&1 &
     java_pid=$!
-    wait_for_port "$java_port" java
     targets+=("java=127.0.0.1:$java_port@$java_pid")
 elif [ -n "$jar" ]; then
     echo
@@ -108,7 +92,9 @@ else
     echo "against the original."
 fi
 
-"$root/target/release/limbo-bench" "${bench_arguments[@]}" "${targets[@]}"
+# --wait-seconds so the servers are given time to come up; the tool retries rather
+# than the shell guessing when a port is ready.
+"$root/target/release/limbo-bench" --wait-seconds 30 "${bench_arguments[@]}" "${targets[@]}"
 
 if [ -n "$java_pid" ]; then
     echo "Java heap settings shape its resident figure; this is an out-of-the-box comparison."
