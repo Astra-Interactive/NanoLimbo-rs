@@ -1,3 +1,13 @@
 /target
 **/*.rs.bk
+
+# Kept in the working tree, deliberately not published.
+#
+# The migration plan is the record of how this port was made and why it diverges from
+# upstream where it does; it is working material rather than something a user of the
+# server needs. The rest are instructions for AI coding assistants.
+MIGRATION_PLAN.md
 WORKLOG.md
+AGENTS.md
+CLAUDE.md
+.claude/
