@@ -1,0 +1,16 @@
+[versions]
+klibs-gradleplugin = "2.7.2" # https://github.com/makeevrserg/gradle-plugin
+kotlin-version = "2.4.10" # https://github.com/jetbrains/kotlin
+minecraft-bungee = "26.1-R0.1-SNAPSHOT" # https://github.com/SpigotMC/BungeeCord
+# 4.x is compiled for JVM 25; 3.5.1 is the newest release this toolchain can compile against
+minecraft-velocity = "3.5.1" # https://github.com/PaperMC/Velocity
+nativeaccess-jna = "5.19.1" # https://github.com/java-native-access/jna
+
+[libraries]
+minecraft-bungee-api = { module = "net.md-5:bungeecord-api", version.ref = "minecraft-bungee" }
+minecraft-velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "minecraft-velocity" }
+nativeaccess-jna = { module = "net.java.dev.jna:jna", version.ref = "nativeaccess-jna" }
+
+[plugins]
+klibs-gradle-java-version = { id = "ru.astrainteractive.gradleplugin.java.version", version.ref = "klibs-gradleplugin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
