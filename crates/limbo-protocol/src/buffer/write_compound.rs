@@ -1,9 +1,9 @@
+use crate::version::ProtocolVersion;
 use bytes::BufMut;
-use limbo_protocol::version::ProtocolVersion;
 use valence_nbt::Compound;
 use valence_nbt::binary::{to_binary, written_size};
 
-use crate::nbt_encode_error::NbtEncodeError;
+use crate::buffer::nbt_encode_error::NbtEncodeError;
 
 /// Bytes an encoder writes ahead of the compound body when the root name is empty: the
 /// root tag id (`0x0A`) followed by the two-byte length of that empty name.

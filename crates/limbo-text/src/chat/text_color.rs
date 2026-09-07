@@ -22,10 +22,10 @@ impl TextColor {
 
     /// Reduces this colour to the closest of the sixteen named colours.
     ///
-    /// Distance is measured the way the reference implementation measures it: squared
-    /// Euclidean distance in RGB, with the red channel weighted by the mean of the two
-    /// reds. Any other metric picks a different colour for some inputs, so this is
-    /// wire-visible for pre-1.16 clients.
+    /// Distance is measured in HSV with the hue difference weighted three times, which is
+    /// what the reference implementation uses. An RGB metric picks visibly different
+    /// colours: a pale blue is nearest to grey by RGB distance but to blue by hue, and
+    /// the client shows whichever one we send.
     pub fn to_named(self) -> NamedColor {
         match self {
             Self::Named(named) => named,
@@ -34,23 +34,61 @@ impl TextColor {
     }
 }
 
-fn distance_squared(left: RgbColor, right: RgbColor) -> f64 {
-    let mean_red = (f64::from(left.red) + f64::from(right.red)) / 2.0;
-    let delta_red = f64::from(left.red) - f64::from(right.red);
-    let delta_green = f64::from(left.green) - f64::from(right.green);
-    let delta_blue = f64::from(left.blue) - f64::from(right.blue);
-
-    (2.0 + mean_red / 256.0) * delta_red * delta_red
-        + 4.0 * delta_green * delta_green
-        + (2.0 + (255.0 - mean_red) / 256.0) * delta_blue * delta_blue
+/// Hue in turns, saturation and value, each in `0.0..=1.0`.
+///
+/// Single precision on purpose. The reference implementation uses Java `float`, and the
+/// difference decides real cases: pure red sits equidistant between `red` and `dark_red`
+/// in exact arithmetic, and only the rounding of 32-bit maths picks the same one.
+struct HsvColor {
+    hue: f32,
+    saturation: f32,
+    value: f32,
 }
 
+fn to_hsv(rgb: RgbColor) -> HsvColor {
+    let red = f32::from(rgb.red) / 255.0;
+    let green = f32::from(rgb.green) / 255.0;
+    let blue = f32::from(rgb.blue) / 255.0;
+
+    let max = red.max(green).max(blue);
+    let min = red.min(green).min(blue);
+    let span = max - min;
+
+    let hue = if span == 0.0 {
+        0.0
+    } else if max == red {
+        ((green - blue) / span).rem_euclid(6.0)
+    } else if max == green {
+        (blue - red) / span + 2.0
+    } else {
+        (red - green) / span + 4.0
+    } / 6.0;
+
+    HsvColor {
+        hue,
+        saturation: if max == 0.0 { 0.0 } else { span / max },
+        value: max,
+    }
+}
+
+fn distance_squared(left: &HsvColor, right: &HsvColor) -> f32 {
+    let hue_gap = (left.hue - right.hue).abs();
+    let hue_distance = 3.0 * hue_gap.min(1.0 - hue_gap);
+    let saturation_gap = left.saturation - right.saturation;
+    let value_gap = left.value - right.value;
+
+    hue_distance * hue_distance + saturation_gap * saturation_gap + value_gap * value_gap
+}
+
+/// Ties are broken by declaration order, as they are upstream: pure red sits exactly
+/// between `red` and `dark_red`, and the client is sent `dark_red`.
 fn nearest_named(rgb: RgbColor) -> NamedColor {
-    let mut best = NamedColor::White;
-    let mut best_distance = f64::MAX;
+    let target = to_hsv(rgb);
+    let mut best = NamedColor::Black;
+    let mut best_distance = f32::MAX;
 
     for candidate in NamedColor::ALL {
-        let distance = distance_squared(rgb, candidate.rgb());
+        let distance = distance_squared(&target, &to_hsv(candidate.rgb()));
         if distance < best_distance {
             best_distance = distance;
             best = candidate;
@@ -72,9 +110,22 @@ mod tests {
     }
 
     #[test]
-    fn given_a_colour_between_names_when_reduced_then_the_nearer_name_wins() {
-        let almost_red = RgbColor::from_packed(0xFE5A5A);
+    fn given_a_colour_that_only_differs_in_saturation_then_hue_decides_the_name() {
+        // Pale blue: nearer to grey by RGB distance, but the client should see blue.
+        let pale_blue = RgbColor::from_packed(0xAAAAFF);
 
-        assert_eq!(TextColor::Rgb(almost_red).to_named(), NamedColor::Red);
+        assert_eq!(TextColor::Rgb(pale_blue).to_named(), NamedColor::Blue);
+    }
+
+    #[test]
+    fn given_a_colour_equidistant_between_two_names_then_declaration_order_breaks_the_tie() {
+        assert_eq!(
+            TextColor::Rgb(RgbColor::from_packed(0xFF0000)).to_named(),
+            NamedColor::DarkRed
+        );
+        assert_eq!(
+            TextColor::Rgb(RgbColor::from_packed(0x00FF00)).to_named(),
+            NamedColor::DarkGreen
+        );
     }
 }

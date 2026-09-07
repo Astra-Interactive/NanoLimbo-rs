@@ -129,13 +129,18 @@ dependencies = [
  "serde_json",
  "thiserror",
  "uuid",
+ "valence_nbt",
 ]
 
 [[package]]
 name = "limbo-text"
 version = "0.1.0"
 dependencies = [
+ "bytes",
+ "limbo-protocol",
+ "serde_json",
  "thiserror",
+ "valence_nbt",
 ]
 
 [[package]]

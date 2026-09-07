@@ -5,6 +5,12 @@
       "input": "",
       "legacy": "",
       "plain": "",
+      "json": {
+        "4": "{\"text\":\"\"}",
+        "735": "{\"text\":\"\"}",
+        "765": "\"\"",
+        "770": "\"\""
+      },
       "encodings": [
         {
           "protocols": [
@@ -73,6 +79,12 @@
       "input": "plain text",
       "legacy": "plain text",
       "plain": "plain text",
+      "json": {
+        "4": "{\"text\":\"plain text\"}",
+        "735": "{\"text\":\"plain text\"}",
+        "765": "\"plain text\"",
+        "770": "\"plain text\""
+      },
       "encodings": [
         {
           "protocols": [
@@ -141,6 +153,12 @@
       "input": "NanoLimbo",
       "legacy": "NanoLimbo",
       "plain": "NanoLimbo",
+      "json": {
+        "4": "{\"text\":\"NanoLimbo\"}",
+        "735": "{\"text\":\"NanoLimbo\"}",
+        "765": "\"NanoLimbo\"",
+        "770": "\"NanoLimbo\""
+      },
       "encodings": [
         {
           "protocols": [
@@ -209,6 +227,12 @@
       "input": "&aGreen &lBold&r plain",
       "legacy": "§aGreen §lBold§r plain",
       "plain": "Green Bold plain",
+      "json": {
+        "4": "{\"extra\":[{\"color\":\"green\",\"extra\":[{\"bold\":true,\"text\":\"Bold\"}],\"text\":\"Green \"},{\"text\":\" plain\"}],\"text\":\"\"}",
+        "735": "{\"extra\":[{\"color\":\"green\",\"extra\":[{\"bold\":true,\"text\":\"Bold\"}],\"text\":\"Green \"},{\"text\":\" plain\"}],\"text\":\"\"}",
+        "765": "{\"extra\":[{\"color\":\"green\",\"extra\":[{\"bold\":true,\"text\":\"Bold\"}],\"text\":\"Green \"},\" plain\"],\"text\":\"\"}",
+        "770": "{\"extra\":[{\"color\":\"green\",\"extra\":[{\"bold\":true,\"text\":\"Bold\"}],\"text\":\"Green \"},\" plain\"],\"text\":\"\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -277,6 +301,12 @@
       "input": "&x&f&f&0&0&0&0hex legacy",
       "legacy": "§4hex legacy",
       "plain": "hex legacy",
+      "json": {
+        "4": "{\"color\":\"dark_red\",\"text\":\"hex legacy\"}",
+        "735": "{\"color\":\"#FF0000\",\"text\":\"hex legacy\"}",
+        "765": "{\"color\":\"#FF0000\",\"text\":\"hex legacy\"}",
+        "770": "{\"color\":\"#FF0000\",\"text\":\"hex legacy\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -350,6 +380,12 @@
       "input": "§aSection green",
       "legacy": "§aSection green",
       "plain": "Section green",
+      "json": {
+        "4": "{\"color\":\"green\",\"text\":\"Section green\"}",
+        "735": "{\"color\":\"green\",\"text\":\"Section green\"}",
+        "765": "{\"color\":\"green\",\"text\":\"Section green\"}",
+        "770": "{\"color\":\"green\",\"text\":\"Section green\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -418,6 +454,12 @@
       "input": "<red>red text",
       "legacy": "§cred text",
       "plain": "red text",
+      "json": {
+        "4": "{\"color\":\"red\",\"text\":\"red text\"}",
+        "735": "{\"color\":\"red\",\"text\":\"red text\"}",
+        "765": "{\"color\":\"red\",\"text\":\"red text\"}",
+        "770": "{\"color\":\"red\",\"text\":\"red text\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -486,6 +528,12 @@
       "input": "<#ff8800>hex colour",
       "legacy": "§6hex colour",
       "plain": "hex colour",
+      "json": {
+        "4": "{\"color\":\"gold\",\"text\":\"hex colour\"}",
+        "735": "{\"color\":\"#FF8800\",\"text\":\"hex colour\"}",
+        "765": "{\"color\":\"#FF8800\",\"text\":\"hex colour\"}",
+        "770": "{\"color\":\"#FF8800\",\"text\":\"hex colour\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -559,6 +607,12 @@
       "input": "<gradient:blue:white>NanoLimbo",
       "legacy": "§9N§9a§9n§9o§9L§9i§9m§9b§fo",
       "plain": "NanoLimbo",
+      "json": {
+        "4": "{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"blue\",\"text\":\"a\"},{\"color\":\"blue\",\"text\":\"n\"},{\"color\":\"blue\",\"text\":\"o\"},{\"color\":\"blue\",\"text\":\"L\"},{\"color\":\"blue\",\"text\":\"i\"},{\"color\":\"blue\",\"text\":\"m\"},{\"color\":\"blue\",\"text\":\"b\"},{\"color\":\"white\",\"text\":\"o\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "735": "{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"#6A6AFF\",\"text\":\"a\"},{\"color\":\"#8080FF\",\"text\":\"n\"},{\"color\":\"#9595FF\",\"text\":\"o\"},{\"color\":\"#AAAAFF\",\"text\":\"L\"},{\"color\":\"#BFBFFF\",\"text\":\"i\"},{\"color\":\"#D5D5FF\",\"text\":\"m\"},{\"color\":\"#EAEAFF\",\"text\":\"b\"},{\"color\":\"white\",\"text\":\"o\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "765": "{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"#6A6AFF\",\"text\":\"a\"},{\"color\":\"#8080FF\",\"text\":\"n\"},{\"color\":\"#9595FF\",\"text\":\"o\"},{\"color\":\"#AAAAFF\",\"text\":\"L\"},{\"color\":\"#BFBFFF\",\"text\":\"i\"},{\"color\":\"#D5D5FF\",\"text\":\"m\"},{\"color\":\"#EAEAFF\",\"text\":\"b\"},{\"color\":\"white\",\"text\":\"o\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "770": "{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"#6A6AFF\",\"text\":\"a\"},{\"color\":\"#8080FF\",\"text\":\"n\"},{\"color\":\"#9595FF\",\"text\":\"o\"},{\"color\":\"#AAAAFF\",\"text\":\"L\"},{\"color\":\"#BFBFFF\",\"text\":\"i\"},{\"color\":\"#D5D5FF\",\"text\":\"m\"},{\"color\":\"#EAEAFF\",\"text\":\"b\"},{\"color\":\"white\",\"text\":\"o\"}],\"text\":\"\"}],\"text\":\"\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -632,6 +686,12 @@
       "input": "<gradient:red:green:blue>three stops",
       "legacy": "§ct§ch§er§ee§ae§a §as§bt§bo§9p§9s",
       "plain": "three stops",
+      "json": {
+        "4": "{\"extra\":[{\"extra\":[{\"color\":\"red\",\"text\":\"t\"},{\"color\":\"red\",\"text\":\"h\"},{\"color\":\"yellow\",\"text\":\"r\"},{\"color\":\"yellow\",\"text\":\"e\"},{\"color\":\"green\",\"text\":\"e\"},{\"color\":\"green\",\"text\":\" \"},{\"color\":\"green\",\"text\":\"s\"},{\"color\":\"aqua\",\"text\":\"t\"},{\"color\":\"aqua\",\"text\":\"o\"},{\"color\":\"blue\",\"text\":\"p\"},{\"color\":\"blue\",\"text\":\"s\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "735": "{\"extra\":[{\"extra\":[{\"color\":\"red\",\"text\":\"t\"},{\"color\":\"#DD7755\",\"text\":\"h\"},{\"color\":\"#BB9955\",\"text\":\"r\"},{\"color\":\"#99BB55\",\"text\":\"e\"},{\"color\":\"#77DD55\",\"text\":\"e\"},{\"color\":\"green\",\"text\":\" \"},{\"color\":\"#55DD77\",\"text\":\"s\"},{\"color\":\"#55BB99\",\"text\":\"t\"},{\"color\":\"#5599BB\",\"text\":\"o\"},{\"color\":\"#5577DD\",\"text\":\"p\"},{\"color\":\"blue\",\"text\":\"s\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "765": "{\"extra\":[{\"extra\":[{\"color\":\"red\",\"text\":\"t\"},{\"color\":\"#DD7755\",\"text\":\"h\"},{\"color\":\"#BB9955\",\"text\":\"r\"},{\"color\":\"#99BB55\",\"text\":\"e\"},{\"color\":\"#77DD55\",\"text\":\"e\"},{\"color\":\"green\",\"text\":\" \"},{\"color\":\"#55DD77\",\"text\":\"s\"},{\"color\":\"#55BB99\",\"text\":\"t\"},{\"color\":\"#5599BB\",\"text\":\"o\"},{\"color\":\"#5577DD\",\"text\":\"p\"},{\"color\":\"blue\",\"text\":\"s\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "770": "{\"extra\":[{\"extra\":[{\"color\":\"red\",\"text\":\"t\"},{\"color\":\"#DD7755\",\"text\":\"h\"},{\"color\":\"#BB9955\",\"text\":\"r\"},{\"color\":\"#99BB55\",\"text\":\"e\"},{\"color\":\"#77DD55\",\"text\":\"e\"},{\"color\":\"green\",\"text\":\" \"},{\"color\":\"#55DD77\",\"text\":\"s\"},{\"color\":\"#55BB99\",\"text\":\"t\"},{\"color\":\"#5599BB\",\"text\":\"o\"},{\"color\":\"#5577DD\",\"text\":\"p\"},{\"color\":\"blue\",\"text\":\"s\"}],\"text\":\"\"}],\"text\":\"\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -705,6 +765,12 @@
       "input": "<gradient:blue:white>x",
       "legacy": "§9x",
       "plain": "x",
+      "json": {
+        "4": "{\"extra\":[{\"color\":\"blue\",\"text\":\"x\"}],\"text\":\"\"}",
+        "735": "{\"extra\":[{\"color\":\"blue\",\"text\":\"x\"}],\"text\":\"\"}",
+        "765": "{\"extra\":[{\"color\":\"blue\",\"text\":\"x\"}],\"text\":\"\"}",
+        "770": "{\"extra\":[{\"color\":\"blue\",\"text\":\"x\"}],\"text\":\"\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -773,6 +839,12 @@
       "input": "<rainbow>rainbow text",
       "legacy": "§4r§6a§6i§2n§2b§2o§3w§1 §1t§1e§5x§4t",
       "plain": "rainbow text",
+      "json": {
+        "4": "{\"extra\":[{\"extra\":[{\"color\":\"dark_red\",\"text\":\"r\"},{\"color\":\"gold\",\"text\":\"a\"},{\"color\":\"gold\",\"text\":\"i\"},{\"color\":\"dark_green\",\"text\":\"n\"},{\"color\":\"dark_green\",\"text\":\"b\"},{\"color\":\"dark_green\",\"text\":\"o\"},{\"color\":\"dark_aqua\",\"text\":\"w\"},{\"color\":\"dark_blue\",\"text\":\" \"},{\"color\":\"dark_blue\",\"text\":\"t\"},{\"color\":\"dark_blue\",\"text\":\"e\"},{\"color\":\"dark_purple\",\"text\":\"x\"},{\"color\":\"dark_red\",\"text\":\"t\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "735": "{\"extra\":[{\"extra\":[{\"color\":\"#FF0000\",\"text\":\"r\"},{\"color\":\"#FF7F00\",\"text\":\"a\"},{\"color\":\"#FFFF00\",\"text\":\"i\"},{\"color\":\"#7FFF00\",\"text\":\"n\"},{\"color\":\"#00FF00\",\"text\":\"b\"},{\"color\":\"#00FF7F\",\"text\":\"o\"},{\"color\":\"#00FFFF\",\"text\":\"w\"},{\"color\":\"#007FFF\",\"text\":\" \"},{\"color\":\"#0000FF\",\"text\":\"t\"},{\"color\":\"#7F00FF\",\"text\":\"e\"},{\"color\":\"#FF00FF\",\"text\":\"x\"},{\"color\":\"#FF007F\",\"text\":\"t\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "765": "{\"extra\":[{\"extra\":[{\"color\":\"#FF0000\",\"text\":\"r\"},{\"color\":\"#FF7F00\",\"text\":\"a\"},{\"color\":\"#FFFF00\",\"text\":\"i\"},{\"color\":\"#7FFF00\",\"text\":\"n\"},{\"color\":\"#00FF00\",\"text\":\"b\"},{\"color\":\"#00FF7F\",\"text\":\"o\"},{\"color\":\"#00FFFF\",\"text\":\"w\"},{\"color\":\"#007FFF\",\"text\":\" \"},{\"color\":\"#0000FF\",\"text\":\"t\"},{\"color\":\"#7F00FF\",\"text\":\"e\"},{\"color\":\"#FF00FF\",\"text\":\"x\"},{\"color\":\"#FF007F\",\"text\":\"t\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "770": "{\"extra\":[{\"extra\":[{\"color\":\"#FF0000\",\"text\":\"r\"},{\"color\":\"#FF7F00\",\"text\":\"a\"},{\"color\":\"#FFFF00\",\"text\":\"i\"},{\"color\":\"#7FFF00\",\"text\":\"n\"},{\"color\":\"#00FF00\",\"text\":\"b\"},{\"color\":\"#00FF7F\",\"text\":\"o\"},{\"color\":\"#00FFFF\",\"text\":\"w\"},{\"color\":\"#007FFF\",\"text\":\" \"},{\"color\":\"#0000FF\",\"text\":\"t\"},{\"color\":\"#7F00FF\",\"text\":\"e\"},{\"color\":\"#FF00FF\",\"text\":\"x\"},{\"color\":\"#FF007F\",\"text\":\"t\"}],\"text\":\"\"}],\"text\":\"\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -846,6 +918,12 @@
       "input": "<bold>bold</bold> normal",
       "legacy": "§lbold§r normal",
       "plain": "bold normal",
+      "json": {
+        "4": "{\"extra\":[{\"bold\":true,\"text\":\"bold\"},{\"text\":\" normal\"}],\"text\":\"\"}",
+        "735": "{\"extra\":[{\"bold\":true,\"text\":\"bold\"},{\"text\":\" normal\"}],\"text\":\"\"}",
+        "765": "{\"extra\":[{\"bold\":true,\"text\":\"bold\"},\" normal\"],\"text\":\"\"}",
+        "770": "{\"extra\":[{\"bold\":true,\"text\":\"bold\"},\" normal\"],\"text\":\"\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -914,6 +992,12 @@
       "input": "<b>b</b><i>i</i><u>u</u><st>st</st><obf>obf</obf>",
       "legacy": "§lb§r§oi§r§nu§r§mst§r§kobf",
       "plain": "biustobf",
+      "json": {
+        "4": "{\"extra\":[{\"bold\":true,\"text\":\"b\"},{\"italic\":true,\"text\":\"i\"},{\"underlined\":true,\"text\":\"u\"},{\"strikethrough\":true,\"text\":\"st\"},{\"obfuscated\":true,\"text\":\"obf\"}],\"text\":\"\"}",
+        "735": "{\"extra\":[{\"bold\":true,\"text\":\"b\"},{\"italic\":true,\"text\":\"i\"},{\"underlined\":true,\"text\":\"u\"},{\"strikethrough\":true,\"text\":\"st\"},{\"obfuscated\":true,\"text\":\"obf\"}],\"text\":\"\"}",
+        "765": "{\"extra\":[{\"bold\":true,\"text\":\"b\"},{\"italic\":true,\"text\":\"i\"},{\"underlined\":true,\"text\":\"u\"},{\"strikethrough\":true,\"text\":\"st\"},{\"obfuscated\":true,\"text\":\"obf\"}],\"text\":\"\"}",
+        "770": "{\"extra\":[{\"bold\":true,\"text\":\"b\"},{\"italic\":true,\"text\":\"i\"},{\"underlined\":true,\"text\":\"u\"},{\"strikethrough\":true,\"text\":\"st\"},{\"obfuscated\":true,\"text\":\"obf\"}],\"text\":\"\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -982,6 +1066,12 @@
       "input": "<red>outer <blue>inner</blue> outer",
       "legacy": "§couter §9inner§c outer",
       "plain": "outer inner outer",
+      "json": {
+        "4": "{\"color\":\"red\",\"extra\":[{\"color\":\"blue\",\"text\":\"inner\"},{\"text\":\" outer\"}],\"text\":\"outer \"}",
+        "735": "{\"color\":\"red\",\"extra\":[{\"color\":\"blue\",\"text\":\"inner\"},{\"text\":\" outer\"}],\"text\":\"outer \"}",
+        "765": "{\"color\":\"red\",\"extra\":[{\"color\":\"blue\",\"text\":\"inner\"},\" outer\"],\"text\":\"outer \"}",
+        "770": "{\"color\":\"red\",\"extra\":[{\"color\":\"blue\",\"text\":\"inner\"},\" outer\"],\"text\":\"outer \"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1050,6 +1140,12 @@
       "input": "<red>unclosed",
       "legacy": "§cunclosed",
       "plain": "unclosed",
+      "json": {
+        "4": "{\"color\":\"red\",\"text\":\"unclosed\"}",
+        "735": "{\"color\":\"red\",\"text\":\"unclosed\"}",
+        "765": "{\"color\":\"red\",\"text\":\"unclosed\"}",
+        "770": "{\"color\":\"red\",\"text\":\"unclosed\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1118,6 +1214,12 @@
       "input": "\\<not a tag>",
       "legacy": "<not a tag>",
       "plain": "<not a tag>",
+      "json": {
+        "4": "{\"text\":\"<not a tag>\"}",
+        "735": "{\"text\":\"<not a tag>\"}",
+        "765": "\"<not a tag>\"",
+        "770": "\"<not a tag>\""
+      },
       "encodings": [
         {
           "protocols": [
@@ -1186,6 +1288,12 @@
       "input": "<click:open_url:'https://example.com'>link</click>",
       "legacy": "link",
       "plain": "link",
+      "json": {
+        "4": "{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://example.com\"},\"text\":\"link\"}",
+        "735": "{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://example.com\"},\"text\":\"link\"}",
+        "765": "{\"clickEvent\":{\"action\":\"open_url\",\"value\":\"https://example.com\"},\"text\":\"link\"}",
+        "770": "{\"click_event\":{\"action\":\"open_url\",\"url\":\"https://example.com\"},\"text\":\"link\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1259,6 +1367,12 @@
       "input": "<click:run_command:'/help'>run</click>",
       "legacy": "run",
       "plain": "run",
+      "json": {
+        "4": "{\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/help\"},\"text\":\"run\"}",
+        "735": "{\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/help\"},\"text\":\"run\"}",
+        "765": "{\"clickEvent\":{\"action\":\"run_command\",\"value\":\"/help\"},\"text\":\"run\"}",
+        "770": "{\"click_event\":{\"action\":\"run_command\",\"command\":\"/help\"},\"text\":\"run\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1332,6 +1446,12 @@
       "input": "<hover:show_text:'tooltip'>hover me</hover>",
       "legacy": "hover me",
       "plain": "hover me",
+      "json": {
+        "4": "{\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"tooltip\"}},\"text\":\"hover me\"}",
+        "735": "{\"hoverEvent\":{\"action\":\"show_text\",\"contents\":{\"text\":\"tooltip\"}},\"text\":\"hover me\"}",
+        "765": "{\"hoverEvent\":{\"action\":\"show_text\",\"contents\":\"tooltip\"},\"text\":\"hover me\"}",
+        "770": "{\"hover_event\":{\"action\":\"show_text\",\"value\":\"tooltip\"},\"text\":\"hover me\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1410,6 +1530,12 @@
       "input": "<key:key.jump>",
       "legacy": "key.jump",
       "plain": "key.jump",
+      "json": {
+        "4": "{\"keybind\":\"key.jump\"}",
+        "735": "{\"keybind\":\"key.jump\"}",
+        "765": "{\"keybind\":\"key.jump\"}",
+        "770": "{\"keybind\":\"key.jump\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1478,6 +1604,12 @@
       "input": "<lang:menu.singleplayer>",
       "legacy": "menu.singleplayer",
       "plain": "menu.singleplayer",
+      "json": {
+        "4": "{\"translate\":\"menu.singleplayer\"}",
+        "735": "{\"translate\":\"menu.singleplayer\"}",
+        "765": "{\"translate\":\"menu.singleplayer\"}",
+        "770": "{\"translate\":\"menu.singleplayer\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1546,6 +1678,12 @@
       "input": "line one<newline>line two",
       "legacy": "line one\nline two",
       "plain": "line one\nline two",
+      "json": {
+        "4": "{\"text\":\"line one\\nline two\"}",
+        "735": "{\"text\":\"line one\\nline two\"}",
+        "765": "\"line one\\nline two\"",
+        "770": "\"line one\\nline two\""
+      },
       "encodings": [
         {
           "protocols": [
@@ -1614,6 +1752,12 @@
       "input": "<white>unicode: ä€𝄞",
       "legacy": "§funicode: ä€𝄞",
       "plain": "unicode: ä€𝄞",
+      "json": {
+        "4": "{\"color\":\"white\",\"text\":\"unicode: ä€𝄞\"}",
+        "735": "{\"color\":\"white\",\"text\":\"unicode: ä€𝄞\"}",
+        "765": "{\"color\":\"white\",\"text\":\"unicode: ä€𝄞\"}",
+        "770": "{\"color\":\"white\",\"text\":\"unicode: ä€𝄞\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1682,6 +1826,12 @@
       "input": "{\"text\":\"raw json\",\"color\":\"red\"}",
       "legacy": "§craw json",
       "plain": "raw json",
+      "json": {
+        "4": "{\"color\":\"red\",\"text\":\"raw json\"}",
+        "735": "{\"color\":\"red\",\"text\":\"raw json\"}",
+        "765": "{\"color\":\"red\",\"text\":\"raw json\"}",
+        "770": "{\"color\":\"red\",\"text\":\"raw json\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1750,6 +1900,12 @@
       "input": "{\"text\":\"bold json\",\"bold\":true,\"color\":\"#00ff00\"}",
       "legacy": "§2§lbold json",
       "plain": "bold json",
+      "json": {
+        "4": "{\"bold\":true,\"color\":\"dark_green\",\"text\":\"bold json\"}",
+        "735": "{\"bold\":true,\"color\":\"#00FF00\",\"text\":\"bold json\"}",
+        "765": "{\"bold\":true,\"color\":\"#00FF00\",\"text\":\"bold json\"}",
+        "770": "{\"bold\":true,\"color\":\"#00FF00\",\"text\":\"bold json\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1823,6 +1979,12 @@
       "input": "<gradient:blue:white>NanoLimbo",
       "legacy": "§9N§9a§9n§9o§9L§9i§9m§9b§fo",
       "plain": "NanoLimbo",
+      "json": {
+        "4": "{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"blue\",\"text\":\"a\"},{\"color\":\"blue\",\"text\":\"n\"},{\"color\":\"blue\",\"text\":\"o\"},{\"color\":\"blue\",\"text\":\"L\"},{\"color\":\"blue\",\"text\":\"i\"},{\"color\":\"blue\",\"text\":\"m\"},{\"color\":\"blue\",\"text\":\"b\"},{\"color\":\"white\",\"text\":\"o\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "735": "{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"#6A6AFF\",\"text\":\"a\"},{\"color\":\"#8080FF\",\"text\":\"n\"},{\"color\":\"#9595FF\",\"text\":\"o\"},{\"color\":\"#AAAAFF\",\"text\":\"L\"},{\"color\":\"#BFBFFF\",\"text\":\"i\"},{\"color\":\"#D5D5FF\",\"text\":\"m\"},{\"color\":\"#EAEAFF\",\"text\":\"b\"},{\"color\":\"white\",\"text\":\"o\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "765": "{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"#6A6AFF\",\"text\":\"a\"},{\"color\":\"#8080FF\",\"text\":\"n\"},{\"color\":\"#9595FF\",\"text\":\"o\"},{\"color\":\"#AAAAFF\",\"text\":\"L\"},{\"color\":\"#BFBFFF\",\"text\":\"i\"},{\"color\":\"#D5D5FF\",\"text\":\"m\"},{\"color\":\"#EAEAFF\",\"text\":\"b\"},{\"color\":\"white\",\"text\":\"o\"}],\"text\":\"\"}],\"text\":\"\"}",
+        "770": "{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"#6A6AFF\",\"text\":\"a\"},{\"color\":\"#8080FF\",\"text\":\"n\"},{\"color\":\"#9595FF\",\"text\":\"o\"},{\"color\":\"#AAAAFF\",\"text\":\"L\"},{\"color\":\"#BFBFFF\",\"text\":\"i\"},{\"color\":\"#D5D5FF\",\"text\":\"m\"},{\"color\":\"#EAEAFF\",\"text\":\"b\"},{\"color\":\"white\",\"text\":\"o\"}],\"text\":\"\"}],\"text\":\"\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1896,6 +2058,12 @@
       "input": "<white>Welcome to the <gradient:blue:white>NanoLimbo<white>!",
       "legacy": "§fWelcome to the §9N§9a§9n§9o§9L§9i§9m§9b§9o§f!",
       "plain": "Welcome to the NanoLimbo!",
+      "json": {
+        "4": "{\"color\":\"white\",\"extra\":[{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"blue\",\"text\":\"a\"},{\"color\":\"blue\",\"text\":\"n\"},{\"color\":\"blue\",\"text\":\"o\"},{\"color\":\"blue\",\"text\":\"L\"},{\"color\":\"blue\",\"text\":\"i\"},{\"color\":\"blue\",\"text\":\"m\"},{\"color\":\"blue\",\"text\":\"b\"},{\"color\":\"blue\",\"text\":\"o\"}],\"text\":\"\"},{\"text\":\"!\"}],\"text\":\"\"}],\"text\":\"Welcome to the \"}",
+        "735": "{\"color\":\"white\",\"extra\":[{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"#6868FF\",\"text\":\"a\"},{\"color\":\"#7B7BFF\",\"text\":\"n\"},{\"color\":\"#8E8EFF\",\"text\":\"o\"},{\"color\":\"#A1A1FF\",\"text\":\"L\"},{\"color\":\"#B3B3FF\",\"text\":\"i\"},{\"color\":\"#C6C6FF\",\"text\":\"m\"},{\"color\":\"#D9D9FF\",\"text\":\"b\"},{\"color\":\"#ECECFF\",\"text\":\"o\"}],\"text\":\"\"},{\"text\":\"!\"}],\"text\":\"\"}],\"text\":\"Welcome to the \"}",
+        "765": "{\"color\":\"white\",\"extra\":[{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"#6868FF\",\"text\":\"a\"},{\"color\":\"#7B7BFF\",\"text\":\"n\"},{\"color\":\"#8E8EFF\",\"text\":\"o\"},{\"color\":\"#A1A1FF\",\"text\":\"L\"},{\"color\":\"#B3B3FF\",\"text\":\"i\"},{\"color\":\"#C6C6FF\",\"text\":\"m\"},{\"color\":\"#D9D9FF\",\"text\":\"b\"},{\"color\":\"#ECECFF\",\"text\":\"o\"}],\"text\":\"\"},\"!\"],\"text\":\"\"}],\"text\":\"Welcome to the \"}",
+        "770": "{\"color\":\"white\",\"extra\":[{\"extra\":[{\"extra\":[{\"color\":\"blue\",\"text\":\"N\"},{\"color\":\"#6868FF\",\"text\":\"a\"},{\"color\":\"#7B7BFF\",\"text\":\"n\"},{\"color\":\"#8E8EFF\",\"text\":\"o\"},{\"color\":\"#A1A1FF\",\"text\":\"L\"},{\"color\":\"#B3B3FF\",\"text\":\"i\"},{\"color\":\"#C6C6FF\",\"text\":\"m\"},{\"color\":\"#D9D9FF\",\"text\":\"b\"},{\"color\":\"#ECECFF\",\"text\":\"o\"}],\"text\":\"\"},\"!\"],\"text\":\"\"}],\"text\":\"Welcome to the \"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -1969,6 +2137,12 @@
       "input": "<white>Welcome!",
       "legacy": "§fWelcome!",
       "plain": "Welcome!",
+      "json": {
+        "4": "{\"color\":\"white\",\"text\":\"Welcome!\"}",
+        "735": "{\"color\":\"white\",\"text\":\"Welcome!\"}",
+        "765": "{\"color\":\"white\",\"text\":\"Welcome!\"}",
+        "770": "{\"color\":\"white\",\"text\":\"Welcome!\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -2037,6 +2211,12 @@
       "input": "<white><b>Welcome!",
       "legacy": "§f§lWelcome!",
       "plain": "Welcome!",
+      "json": {
+        "4": "{\"bold\":true,\"color\":\"white\",\"text\":\"Welcome!\"}",
+        "735": "{\"bold\":true,\"color\":\"white\",\"text\":\"Welcome!\"}",
+        "765": "{\"bold\":true,\"color\":\"white\",\"text\":\"Welcome!\"}",
+        "770": "{\"bold\":true,\"color\":\"white\",\"text\":\"Welcome!\"}"
+      },
       "encodings": [
         {
           "protocols": [
@@ -2098,6 +2278,396 @@
             776
           ],
           "hex": "0a080005636f6c6f7200057768697465010004626f6c640108000474657874000857656c636f6d652100"
+        }
+      ]
+    },
+    {
+      "input": "unstyled text for the compact form",
+      "legacy": "unstyled text for the compact form",
+      "plain": "unstyled text for the compact form",
+      "json": {
+        "4": "{\"text\":\"unstyled text for the compact form\"}",
+        "735": "{\"text\":\"unstyled text for the compact form\"}",
+        "765": "\"unstyled text for the compact form\"",
+        "770": "\"unstyled text for the compact form\""
+      },
+      "encodings": [
+        {
+          "protocols": [
+            4,
+            5,
+            47,
+            107,
+            108,
+            109,
+            110,
+            210,
+            315,
+            316,
+            335,
+            338,
+            340,
+            393,
+            401,
+            404,
+            477,
+            480,
+            485,
+            490,
+            498,
+            573,
+            575,
+            578,
+            735,
+            736,
+            751,
+            753,
+            754,
+            755,
+            756,
+            757,
+            758,
+            759,
+            760,
+            761,
+            762,
+            763,
+            764
+          ],
+          "hex": "2d7b2274657874223a22756e7374796c6564207465787420666f722074686520636f6d7061637420666f726d227d"
+        },
+        {
+          "protocols": [
+            765,
+            766,
+            767,
+            768,
+            769,
+            770,
+            771,
+            772,
+            773,
+            774,
+            775,
+            776
+          ],
+          "hex": "0a080004746578740022756e7374796c6564207465787420666f722074686520636f6d7061637420666f726d00"
+        }
+      ]
+    },
+    {
+      "input": "<red><hover:show_text:'<blue>styled tip'>styled hover</hover>",
+      "legacy": "§cstyled hover",
+      "plain": "styled hover",
+      "json": {
+        "4": "{\"color\":\"red\",\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"color\":\"blue\",\"text\":\"styled tip\"}},\"text\":\"styled hover\"}",
+        "735": "{\"color\":\"red\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":{\"color\":\"blue\",\"text\":\"styled tip\"}},\"text\":\"styled hover\"}",
+        "765": "{\"color\":\"red\",\"hoverEvent\":{\"action\":\"show_text\",\"contents\":{\"color\":\"blue\",\"text\":\"styled tip\"}},\"text\":\"styled hover\"}",
+        "770": "{\"color\":\"red\",\"hover_event\":{\"action\":\"show_text\",\"value\":{\"color\":\"blue\",\"text\":\"styled tip\"}},\"text\":\"styled hover\"}"
+      },
+      "encodings": [
+        {
+          "protocols": [
+            4,
+            5,
+            47,
+            107,
+            108,
+            109,
+            110,
+            210,
+            315,
+            316,
+            335,
+            338,
+            340,
+            393,
+            401,
+            404,
+            477,
+            480,
+            485,
+            490,
+            498,
+            573,
+            575,
+            578
+          ],
+          "hex": "767b22636f6c6f72223a22726564222c22686f7665724576656e74223a7b22616374696f6e223a2273686f775f74657874222c2276616c7565223a7b22636f6c6f72223a22626c7565222c2274657874223a227374796c656420746970227d7d2c2274657874223a227374796c656420686f766572227d"
+        },
+        {
+          "protocols": [
+            735,
+            736,
+            751,
+            753,
+            754,
+            755,
+            756,
+            757,
+            758,
+            759,
+            760,
+            761,
+            762,
+            763,
+            764
+          ],
+          "hex": "797b22636f6c6f72223a22726564222c22686f7665724576656e74223a7b22616374696f6e223a2273686f775f74657874222c22636f6e74656e7473223a7b22636f6c6f72223a22626c7565222c2274657874223a227374796c656420746970227d7d2c2274657874223a227374796c656420686f766572227d"
+        },
+        {
+          "protocols": [
+            765,
+            766,
+            767,
+            768,
+            769
+          ],
+          "hex": "0a0a000a686f7665724576656e740a0008636f6e74656e7473080005636f6c6f720004626c756508000474657874000a7374796c65642074697000080006616374696f6e000973686f775f7465787400080005636f6c6f72000372656408000474657874000c7374796c656420686f76657200"
+        },
+        {
+          "protocols": [
+            770,
+            771,
+            772,
+            773,
+            774,
+            775,
+            776
+          ],
+          "hex": "0a080005636f6c6f7200037265640a000b686f7665725f6576656e74080006616374696f6e000973686f775f746578740a000576616c7565080005636f6c6f720004626c756508000474657874000a7374796c656420746970000008000474657874000c7374796c656420686f76657200"
+        }
+      ]
+    },
+    {
+      "input": "<click:suggest_command:'/login '>suggest</click>",
+      "legacy": "suggest",
+      "plain": "suggest",
+      "json": {
+        "4": "{\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/login \"},\"text\":\"suggest\"}",
+        "735": "{\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/login \"},\"text\":\"suggest\"}",
+        "765": "{\"clickEvent\":{\"action\":\"suggest_command\",\"value\":\"/login \"},\"text\":\"suggest\"}",
+        "770": "{\"click_event\":{\"action\":\"suggest_command\",\"command\":\"/login \"},\"text\":\"suggest\"}"
+      },
+      "encodings": [
+        {
+          "protocols": [
+            4,
+            5,
+            47,
+            107,
+            108,
+            109,
+            110,
+            210,
+            315,
+            316,
+            335,
+            338,
+            340,
+            393,
+            401,
+            404,
+            477,
+            480,
+            485,
+            490,
+            498,
+            573,
+            575,
+            578,
+            735,
+            736,
+            751,
+            753,
+            754,
+            755,
+            756,
+            757,
+            758,
+            759,
+            760,
+            761,
+            762,
+            763,
+            764
+          ],
+          "hex": "4e7b22636c69636b4576656e74223a7b22616374696f6e223a22737567676573745f636f6d6d616e64222c2276616c7565223a222f6c6f67696e20227d2c2274657874223a2273756767657374227d"
+        },
+        {
+          "protocols": [
+            765,
+            766,
+            767,
+            768,
+            769
+          ],
+          "hex": "0a0a000a636c69636b4576656e74080006616374696f6e000f737567676573745f636f6d6d616e6408000576616c756500072f6c6f67696e20000800047465787400077375676765737400"
+        },
+        {
+          "protocols": [
+            770,
+            771,
+            772,
+            773,
+            774,
+            775,
+            776
+          ],
+          "hex": "0a0a000b636c69636b5f6576656e74080006616374696f6e000f737567676573745f636f6d6d616e64080007636f6d6d616e6400072f6c6f67696e20000800047465787400077375676765737400"
+        }
+      ]
+    },
+    {
+      "input": "<click:copy_to_clipboard:'copied'>copy</click>",
+      "legacy": "copy",
+      "plain": "copy",
+      "json": {
+        "4": "{\"clickEvent\":{\"action\":\"copy_to_clipboard\",\"value\":\"copied\"},\"text\":\"copy\"}",
+        "735": "{\"clickEvent\":{\"action\":\"copy_to_clipboard\",\"value\":\"copied\"},\"text\":\"copy\"}",
+        "765": "{\"clickEvent\":{\"action\":\"copy_to_clipboard\",\"value\":\"copied\"},\"text\":\"copy\"}",
+        "770": "{\"click_event\":{\"action\":\"copy_to_clipboard\",\"value\":\"copied\"},\"text\":\"copy\"}"
+      },
+      "encodings": [
+        {
+          "protocols": [
+            4,
+            5,
+            47,
+            107,
+            108,
+            109,
+            110,
+            210,
+            315,
+            316,
+            335,
+            338,
+            340,
+            393,
+            401,
+            404,
+            477,
+            480,
+            485,
+            490,
+            498,
+            573,
+            575,
+            578,
+            735,
+            736,
+            751,
+            753,
+            754,
+            755,
+            756,
+            757,
+            758,
+            759,
+            760,
+            761,
+            762,
+            763,
+            764
+          ],
+          "hex": "4c7b22636c69636b4576656e74223a7b22616374696f6e223a22636f70795f746f5f636c6970626f617264222c2276616c7565223a22636f70696564227d2c2274657874223a22636f7079227d"
+        },
+        {
+          "protocols": [
+            765,
+            766,
+            767,
+            768,
+            769
+          ],
+          "hex": "0a0a000a636c69636b4576656e74080006616374696f6e0011636f70795f746f5f636c6970626f61726408000576616c75650006636f7069656400080004746578740004636f707900"
+        },
+        {
+          "protocols": [
+            770,
+            771,
+            772,
+            773,
+            774,
+            775,
+            776
+          ],
+          "hex": "0a0a000b636c69636b5f6576656e74080006616374696f6e0011636f70795f746f5f636c6970626f61726408000576616c75650006636f7069656400080004746578740004636f707900"
+        }
+      ]
+    },
+    {
+      "input": "<red>a<blue>b</blue><green>c</green>",
+      "legacy": "§ca§9b§ac",
+      "plain": "abc",
+      "json": {
+        "4": "{\"color\":\"red\",\"extra\":[{\"color\":\"blue\",\"text\":\"b\"},{\"color\":\"green\",\"text\":\"c\"}],\"text\":\"a\"}",
+        "735": "{\"color\":\"red\",\"extra\":[{\"color\":\"blue\",\"text\":\"b\"},{\"color\":\"green\",\"text\":\"c\"}],\"text\":\"a\"}",
+        "765": "{\"color\":\"red\",\"extra\":[{\"color\":\"blue\",\"text\":\"b\"},{\"color\":\"green\",\"text\":\"c\"}],\"text\":\"a\"}",
+        "770": "{\"color\":\"red\",\"extra\":[{\"color\":\"blue\",\"text\":\"b\"},{\"color\":\"green\",\"text\":\"c\"}],\"text\":\"a\"}"
+      },
+      "encodings": [
+        {
+          "protocols": [
+            4,
+            5,
+            47,
+            107,
+            108,
+            109,
+            110,
+            210,
+            315,
+            316,
+            335,
+            338,
+            340,
+            393,
+            401,
+            404,
+            477,
+            480,
+            485,
+            490,
+            498,
+            573,
+            575,
+            578,
+            735,
+            736,
+            751,
+            753,
+            754,
+            755,
+            756,
+            757,
+            758,
+            759,
+            760,
+            761,
+            762,
+            763,
+            764
+          ],
+          "hex": "5d7b22636f6c6f72223a22726564222c226578747261223a5b7b22636f6c6f72223a22626c7565222c2274657874223a2262227d2c7b22636f6c6f72223a22677265656e222c2274657874223a2263227d5d2c2274657874223a2261227d"
+        },
+        {
+          "protocols": [
+            765,
+            766,
+            767,
+            768,
+            769,
+            770,
+            771,
+            772,
+            773,
+            774,
+            775,
+            776
+          ],
+          "hex": "0a080005636f6c6f72000372656409000565787472610a00000002080005636f6c6f720004626c75650800047465787400016200080005636f6c6f720005677265656e08000474657874000163000800047465787400016100"
         }
       ]
     }

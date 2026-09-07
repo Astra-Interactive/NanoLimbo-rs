@@ -61,8 +61,8 @@ impl Component {
 
     /// The text this component and its descendants render to, with all styling dropped.
     ///
-    /// Used for log lines and for the legacy ping version string. Translation keys and
-    /// keybinds contribute nothing, because resolving them needs the client's language.
+    /// Used for log lines and for the legacy ping version string. A translation key or a
+    /// keybind renders as the key itself, since resolving either needs the client.
     pub fn to_plain_text(&self) -> String {
         let mut plain = String::new();
         self.append_plain_text(&mut plain);
@@ -70,8 +70,10 @@ impl Component {
     }
 
     fn append_plain_text(&self, target: &mut String) {
-        if let ComponentContent::Text { text } = &self.content {
-            target.push_str(text);
+        match &self.content {
+            ComponentContent::Text { text } => target.push_str(text),
+            ComponentContent::Translatable { key, .. } => target.push_str(key),
+            ComponentContent::Keybind { keybind } => target.push_str(keybind),
         }
         for child in &self.children {
             child.append_plain_text(target);
