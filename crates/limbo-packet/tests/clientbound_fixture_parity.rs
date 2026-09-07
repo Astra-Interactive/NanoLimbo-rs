@@ -105,8 +105,8 @@ const CODEC_STRUCTURAL_PAIRS: usize = 27;
 const COMPONENT_STRUCTURAL_PAIRS: usize = 72;
 
 /// Java's own table records `0x15` here, which on 1.20.3 is `set_slot`; the Rust table
-/// deliberately says `0x1B`. See `fixtures/README.md` and MIGRATION_PLAN.md 3.1.6. A
-/// payload does not depend on the id it travels under, so only the id check is skipped.
+/// deliberately says `0x1B`; `fixtures/README.md` records why. A payload does not depend
+/// on the id it travels under, so only the id check is skipped.
 const DISCONNECT_ID_DEFECT_PROTOCOL: i32 = 765;
 const DISCONNECT_ID_IN_JAVA: i32 = 0x15;
 const DISCONNECT_ID_CORRECTED: i32 = 0x1B;
@@ -224,7 +224,7 @@ fn undo_empty_key_wrapping_value(value: &Value) -> Value {
 /// Second normalisation, applied to the **reference side only**: a compound whose sole
 /// key is the empty string is rewritten to carry that value under `text`.
 ///
-/// This undoes MIGRATION_PLAN.md 3.1.10 rather than papering over a difference. Java
+/// This undoes a defect in the reference rather than papering over a difference. Java
 /// reaches NBT by way of JSON, so from 1.20.3 a child the JSON serializer compacted to a
 /// bare string arrives at `NbtUtils.fromJson0` as a list element that is not a compound,
 /// and is wrapped under the empty key. The client finds no `text` there and renders
@@ -972,7 +972,7 @@ fn contains_empty_key(compound: &Compound) -> bool {
         })
 }
 
-/// The regression test behind MIGRATION_PLAN.md 3.1.10, and the reason
+/// The regression test behind the empty-key defect, and the reason
 /// [`undo_empty_key_wrapping`] exists.
 ///
 /// Java serializes a component to JSON before turning it into NBT, so a trailing child

@@ -2,8 +2,9 @@
 
 `packet_ids.json` is a distilled snapshot of the packet id tables published by
 [`PrismarineJS/minecraft-data`](https://github.com/PrismarineJS/minecraft-data). It backs
-`crates/limbo-protocol/tests/minecraft_data_cross_check.rs`, the level-0 independent-oracle
-check described in `MIGRATION_PLAN.md` §7.2 and §7.4.
+`crates/limbo-protocol/tests/minecraft_data_cross_check.rs`, the independent-oracle check:
+a second source for the packet id tables, derived from the vanilla client rather than from
+NanoLimbo.
 
 ## Why it exists
 
@@ -16,8 +17,7 @@ of them is wrong.
 It has paid for itself twice so far:
 
 - serverbound configuration `custom_payload` is `0x01` on 1.20.2–1.20.3 and `0x02` from
-  1.20.5; the Java table started `0x02` at 1.20.2, where `0x02` is `finish_configuration`
-  (`MIGRATION_PLAN.md` §3.1.5);
+  1.20.5; the Java table started `0x02` at 1.20.2, where `0x02` is `finish_configuration`;
 - clientbound play `Disconnect` stays at `0x1B` on 1.20.3; the Java table drops it to `0x15`,
   which is `set_slot` there — a copy of the serverbound `KeepAlive` line above it.
 

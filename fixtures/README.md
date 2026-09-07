@@ -1,7 +1,6 @@
 # Fixtures
 
-Reference data the port is verified against. See `../MIGRATION_PLAN.md` section 7 for how
-these fit into the testing pyramid.
+Reference data the port is verified against.
 
 Two independent oracles live here, and the distinction matters:
 
@@ -49,7 +48,7 @@ proves only that the port is faithful, not that either is right. Only
 `minecraft-data/` can say that.
 
 It carries a known consequence: `disconnect_play` records `0x15` for protocol 765,
-which is the defect described in MIGRATION_PLAN.md 3.1.6 (`0x15` is `set_slot` there;
+which is a defect in the Java table (`0x15` is `set_slot` there;
 the correct id is `0x1B`). The Rust table deliberately diverges. The *payload* bytes in
 this fixture are unaffected, since a payload does not depend on the id it travels under,
 so the level 1 byte comparison stands — but any test comparing ids against this file must
@@ -62,7 +61,7 @@ asked for an impossible combination.
 Values the server would draw from a random source are fixed here: entity id 1337,
 teleport id 7654321, and UUIDs of the form `00000000-0000-4000-8000-00000000000N`. The
 port must accept these through an injected `IdSource` rather than calling a global random,
-which is why that port exists at all — see MIGRATION_PLAN.md section 7.5.
+which is why that port exists at all.
 
 ## `packets/update_tags.json`
 
@@ -96,4 +95,4 @@ section above explains.
 
 Once the versions these cover are all verified, they stop being derived from upstream at
 all and become self-hosted regression snapshots — only a genuinely new Minecraft version
-needs new reference bytes. See MIGRATION_PLAN.md section 7.8.
+needs new reference bytes.

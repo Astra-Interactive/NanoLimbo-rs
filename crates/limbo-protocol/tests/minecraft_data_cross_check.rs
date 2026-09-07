@@ -2,12 +2,12 @@
 //!
 //! Every other level of the suite proves the port matches the Java implementation, which by
 //! construction cannot find a bug the Java implementation already has: the port would
-//! reproduce it byte for byte and the comparison would stay green (MIGRATION_PLAN.md 7.2).
+//! reproduce it byte for byte and the comparison would stay green.
 //! `PrismarineJS/minecraft-data` is extracted from the vanilla client rather than from
 //! NanoLimbo, so a disagreement between the two tables is evidence that one of them is wrong.
 //!
 //! It has already earned its place twice: the serverbound configuration `custom_payload` id
-//! (0x01 from 1.20.2, not 0x02 — MIGRATION_PLAN.md 3.1.5) and the clientbound play
+//! (0x01 from 1.20.2, not 0x02) and the clientbound play
 //! `Disconnect` id on 1.20.3.
 //!
 //! The fixture is distilled from upstream by `fixtures/minecraft-data/distil_packet_ids.py`;

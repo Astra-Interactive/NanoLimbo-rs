@@ -82,7 +82,7 @@ pub(crate) static CONFIGURATION_SERVERBOUND: &[PacketMapping] = &[
         VersionRange::new(ProtocolVersion::V1_20_2, ProtocolVersion::V1_20_3),
     ),
     // Diverges from the Java table, which starts this range at 1.20.2 and
-    // collides with FinishConfiguration. See MIGRATION_PLAN.md 3.1.5.
+    // collides with FinishConfiguration.
     PacketMapping::new(
         PacketKind::PluginMessage,
         0x02,

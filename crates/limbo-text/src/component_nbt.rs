@@ -55,8 +55,7 @@ fn json_object_to_compound(fields: &serde_json::Map<String, JsonValue>) -> Compo
 ///
 /// That is not hypothetical: the shipped `settings.yml` join message ends in `!`, which
 /// becomes `{"": "!"}` and disappears for every client from 1.20.3 on. Building the tree
-/// straight from the component avoids the round trip and the loss. See MIGRATION_PLAN.md
-/// section 3.1.10.
+/// straight from the component avoids the round trip and the loss.
 pub fn to_nbt_compound(component: &Component, profile: JsonProfile) -> Compound {
     match build_value(component, profile, false) {
         JsonValue::Object(fields) => json_object_to_compound(&fields),
