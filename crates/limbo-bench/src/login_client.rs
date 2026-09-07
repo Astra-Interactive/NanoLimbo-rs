@@ -178,7 +178,22 @@ impl LoginClient {
         }
     }
 
-    pub const fn bytes_received(&self) -> usize {
+    /// Keeps reading until the server stops sending, then reports the total.
+    ///
+    /// Reaching the play phase is not the end of the join: older clients receive the
+    /// whole world burst *after* login success, and newer ones receive most of it during
+    /// configuration. Measuring at the moment of arrival would therefore report wildly
+    /// different figures for the same work. Waiting for quiet measures the join itself.
+    ///
+    /// Done for one player rather than all of them, because every player is sent the same
+    /// bytes and waiting out a quiet period per player would dominate the run.
+    pub async fn drain_join_burst(&mut self, quiet: std::time::Duration) -> usize {
+        while tokio::time::timeout(quiet, self.read_packet())
+            .await
+            .is_ok_and(|read| read.is_ok())
+        {
+            // Counting happens inside read_packet; this only drives it.
+        }
         self.bytes_received
     }
 }
