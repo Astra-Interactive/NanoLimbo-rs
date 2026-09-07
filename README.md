@@ -20,21 +20,25 @@ one static binary, a few megabytes of RAM.
 
 ---
 
-## 🤖 Vibe-coded on purpose
+## 🤖 Vibe-coded, not improvised
 
-An LLM typed almost every line of this port. It never got to decide anything.
+An LLM typed almost every line. It typed under these rules, written before the first
+commit — 6+ years of Java, Kotlin, C, Rust, Go and JS turned into a checklist a model
+cannot talk its way out of.
 
-| The model brought                                                 | The rules it was handed                                                            |
-|-------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| every encoder branch for 51 versions, typed without getting bored | which crate each one lives in — domain code touches no socket and no clock         |
-| a decode path for everything a client can send                    | no `unwrap`, no panic: `Result` with a domain error enum, because input is hostile |
-| 330 tests, and the patience to keep them green                    | a test states a contract, not what the code happens to do today                    |
-| speed                                                             | taste                                                                              |
-
-The right column is the part a model cannot supply: 6+ years of Java, Kotlin, C, Rust, Go
-and JavaScript, written down once instead of repeated in review. `rustfmt`,
-`clippy -D warnings`, 330 tests and byte-for-byte fixtures from the Java build check that
-it was followed.
+| Rule                            | What it means in this code                                                                      |
+|---------------------------------|-------------------------------------------------------------------------------------------------|
+| No `unwrap`, `expect`, `panic!` | zero of them in production code, all 9 crates — clippy denies them                              |
+| No `unsafe`                     | `unsafe_code = "forbid"`, workspace-wide                                                        |
+| Errors are values               | `Result` + a domain error enum per layer, `From` at every boundary                              |
+| Network input is hostile        | no indexing, no unchecked length, no overflow; a bad packet closes one connection               |
+| Domain owns no I/O              | protocol, text, world, packet hold no socket and no clock — so 51 versions replay in unit tests |
+| DI by hand                      | no globals, no locator; the binary is the only place anything is constructed                    |
+| Deterministic by design         | ids and time come from injected `IdSource` / `Clock` ports                                      |
+| Types, not primitives           | `ProtocolVersion` not `i32`, `Duration` not `u64` ms, named structs not tuples                  |
+| One type per file               | explicit imports, dependency-ordered declarations, no `#[allow(dead_code)]`                     |
+| Tests state contracts           | `given_when_then`, fakes not mocks, every version-gated branch at `V` and `V - 1`               |
+| Trust nothing                   | `rustfmt`, `clippy -D warnings`, 330 tests, byte-for-byte fixtures from the Java build          |
 
 ## ✨ Why this one
 
