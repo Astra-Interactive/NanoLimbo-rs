@@ -3,4 +3,5 @@
 //! This crate is pure domain logic: it performs no I/O and depends on no runtime,
 //! so all of it is host-testable.
 
+pub mod buffer;
 pub mod version;
