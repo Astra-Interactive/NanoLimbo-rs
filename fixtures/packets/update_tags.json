@@ -1,0 +1,829 @@
+{
+  "description": "Update tags content, as per-registry counts plus a SHA-256 over registries and tags sorted by name. Java emits this packet in HashMap order, so its bytes are not comparable - only its content is.",
+  "digestInput": "for each registry sorted by name: name NUL, then for each tag sorted by name: name '=' List.toString(ids) NUL",
+  "entries": [
+    {
+      "protocol": 766,
+      "registryCount": 13,
+      "totalIds": 5684,
+      "digest": "18b6807efc161521faed6eada31a9bed15917e62aa80f2b932ac327d22a2b99a",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 7,
+          "ids": 40
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 181,
+          "ids": 3058
+        },
+        {
+          "registry": "minecraft:cat_variant",
+          "tags": 2,
+          "ids": 21
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 29,
+          "ids": 113
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 1,
+          "ids": 39
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 29,
+          "ids": 227
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 2,
+          "ids": 4
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 147,
+          "ids": 1489
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 26
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 69,
+          "ids": 502
+        }
+      ]
+    },
+    {
+      "protocol": 767,
+      "registryCount": 13,
+      "totalIds": 6362,
+      "digest": "3159f6a8520be52bb4f5ee9b41a3d1e95658a82ae1859f64f3bb456101dacb4d",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 9,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 184,
+          "ids": 3289
+        },
+        {
+          "registry": "minecraft:cat_variant",
+          "tags": 2,
+          "ids": 21
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 32,
+          "ids": 176
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 301
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 34,
+          "ids": 252
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 2,
+          "ids": 4
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 147,
+          "ids": 1512
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 46
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 70,
+          "ids": 554
+        }
+      ]
+    },
+    {
+      "protocol": 768,
+      "registryCount": 13,
+      "totalIds": 6470,
+      "digest": "6151c262a323d113d6ef31472f261014b501648a8f5f95c8fc07c9c64ff03300",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 11,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 185,
+          "ids": 3295
+        },
+        {
+          "registry": "minecraft:cat_variant",
+          "tags": 2,
+          "ids": 21
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 33,
+          "ids": 184
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 301
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 35,
+          "ids": 261
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 2,
+          "ids": 4
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 170,
+          "ids": 1597
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 46
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 70,
+          "ids": 554
+        }
+      ]
+    },
+    {
+      "protocol": 769,
+      "registryCount": 13,
+      "totalIds": 6609,
+      "digest": "cacb4157bea0965f38b2834522da9e63e7fd10dea5fe126cd22319a084bfdc13",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 11,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 186,
+          "ids": 3421
+        },
+        {
+          "registry": "minecraft:cat_variant",
+          "tags": 2,
+          "ids": 21
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 33,
+          "ids": 184
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 301
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 35,
+          "ids": 262
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 2,
+          "ids": 4
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 173,
+          "ids": 1602
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 46
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 70,
+          "ids": 561
+        }
+      ]
+    },
+    {
+      "protocol": 770,
+      "registryCount": 12,
+      "totalIds": 6701,
+      "digest": "9abeadd12f995e1464fbdee964a545fb6e863222cd082232c98a301c428fb8cc",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 11,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 191,
+          "ids": 3435
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 33,
+          "ids": 192
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 301
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 37,
+          "ids": 271
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 2,
+          "ids": 4
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 176,
+          "ids": 1638
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 46
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 72,
+          "ids": 607
+        }
+      ]
+    },
+    {
+      "protocol": 771,
+      "registryCount": 13,
+      "totalIds": 6774,
+      "digest": "2ab51ad9d6e7ddc40ff83e19bc2e10e29d1c393df8706de613cf7ee093255136",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 11,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 194,
+          "ids": 3445
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 33,
+          "ids": 192
+        },
+        {
+          "registry": "minecraft:dialog",
+          "tags": 2,
+          "ids": 0
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 301
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 39,
+          "ids": 299
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 2,
+          "ids": 4
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 179,
+          "ids": 1673
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 46
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 72,
+          "ids": 607
+        }
+      ]
+    },
+    {
+      "protocol": 772,
+      "registryCount": 13,
+      "totalIds": 6775,
+      "digest": "51f1740e17a8c2d376515c0284cf3aead5ed813f4e2e517470e60a110bc0bece",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 11,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 194,
+          "ids": 3445
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 33,
+          "ids": 192
+        },
+        {
+          "registry": "minecraft:dialog",
+          "tags": 2,
+          "ids": 0
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 301
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 39,
+          "ids": 299
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 2,
+          "ids": 4
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 179,
+          "ids": 1673
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 47
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 72,
+          "ids": 607
+        }
+      ]
+    },
+    {
+      "protocol": 773,
+      "registryCount": 13,
+      "totalIds": 7135,
+      "digest": "1035b378ff433af1b80abb675cccdc50eea4ba4972a7ca9b62411926dfd4564f",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 11,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 203,
+          "ids": 3648
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 33,
+          "ids": 192
+        },
+        {
+          "registry": "minecraft:dialog",
+          "tags": 2,
+          "ids": 0
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 301
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 42,
+          "ids": 315
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 2,
+          "ids": 4
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 190,
+          "ids": 1813
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 47
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 72,
+          "ids": 608
+        }
+      ]
+    },
+    {
+      "protocol": 774,
+      "registryCount": 14,
+      "totalIds": 7264,
+      "digest": "52969db6fa0a33a7531adc217d64a4483336daddd06b18851e3cc2c5bb4e9566",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 11,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 204,
+          "ids": 3655
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 33,
+          "ids": 196
+        },
+        {
+          "registry": "minecraft:dialog",
+          "tags": 2,
+          "ids": 0
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 308
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 46,
+          "ids": 368
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 2,
+          "ids": 4
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 198,
+          "ids": 1897
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 47
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:timeline",
+          "tags": 4,
+          "ids": 7
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 68,
+          "ids": 575
+        }
+      ]
+    },
+    {
+      "protocol": 775,
+      "registryCount": 15,
+      "totalIds": 7736,
+      "digest": "cfaccb27e6d750c9e187cbdebaaa786d6dbcb794868c5033be96734ed60dde33",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 11,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 248,
+          "ids": 3998
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 33,
+          "ids": 196
+        },
+        {
+          "registry": "minecraft:dialog",
+          "tags": 2,
+          "ids": 0
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 308
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 47,
+          "ids": 371
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 6,
+          "ids": 9
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 119
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 207,
+          "ids": 1977
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 47
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:potion",
+          "tags": 1,
+          "ids": 41
+        },
+        {
+          "registry": "minecraft:timeline",
+          "tags": 4,
+          "ids": 7
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 68,
+          "ids": 575
+        }
+      ]
+    },
+    {
+      "protocol": 776,
+      "registryCount": 15,
+      "totalIds": 8644,
+      "digest": "5b0eb61bf92cef2bf728f02e268f60faac40789f4a6793106b8ab9abb2e8d6c5",
+      "registries": [
+        {
+          "registry": "minecraft:banner_pattern",
+          "tags": 11,
+          "ids": 42
+        },
+        {
+          "registry": "minecraft:block",
+          "tags": 265,
+          "ids": 4126
+        },
+        {
+          "registry": "minecraft:damage_type",
+          "tags": 34,
+          "ids": 229
+        },
+        {
+          "registry": "minecraft:dialog",
+          "tags": 2,
+          "ids": 0
+        },
+        {
+          "registry": "minecraft:enchantment",
+          "tags": 22,
+          "ids": 308
+        },
+        {
+          "registry": "minecraft:entity_type",
+          "tags": 48,
+          "ids": 375
+        },
+        {
+          "registry": "minecraft:fluid",
+          "tags": 6,
+          "ids": 9
+        },
+        {
+          "registry": "minecraft:game_event",
+          "tags": 5,
+          "ids": 121
+        },
+        {
+          "registry": "minecraft:instrument",
+          "tags": 3,
+          "ids": 16
+        },
+        {
+          "registry": "minecraft:item",
+          "tags": 224,
+          "ids": 2712
+        },
+        {
+          "registry": "minecraft:painting_variant",
+          "tags": 1,
+          "ids": 47
+        },
+        {
+          "registry": "minecraft:point_of_interest_type",
+          "tags": 3,
+          "ids": 30
+        },
+        {
+          "registry": "minecraft:potion",
+          "tags": 1,
+          "ids": 41
+        },
+        {
+          "registry": "minecraft:timeline",
+          "tags": 4,
+          "ids": 7
+        },
+        {
+          "registry": "minecraft:worldgen/biome",
+          "tags": 68,
+          "ids": 581
+        }
+      ]
+    }
+  ]
+}
