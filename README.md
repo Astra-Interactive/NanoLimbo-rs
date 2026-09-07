@@ -20,6 +20,22 @@ one static binary, a few megabytes of RAM.
 
 ---
 
+## 🤖 Vibe-coded on purpose
+
+An LLM typed almost every line of this port. It never got to decide anything.
+
+| The model brought                                                 | The rules it was handed                                                            |
+|-------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| every encoder branch for 51 versions, typed without getting bored | which crate each one lives in — domain code touches no socket and no clock         |
+| a decode path for everything a client can send                    | no `unwrap`, no panic: `Result` with a domain error enum, because input is hostile |
+| 330 tests, and the patience to keep them green                    | a test states a contract, not what the code happens to do today                    |
+| speed                                                             | taste                                                                              |
+
+The right column is the part a model cannot supply: 6+ years of Java, Kotlin, C, Rust, Go
+and JavaScript, written down once instead of repeated in review. `rustfmt`,
+`clippy -D warnings`, 330 tests and byte-for-byte fixtures from the Java build check that
+it was followed.
+
 ## ✨ Why this one
 
 - 🪶 **Small.** ~4 MB idle in a container, ~57 KB per player. A `scratch` image with nothing in it but the binary.
@@ -268,26 +284,56 @@ against the golden fixtures in `fixtures/`, which are generated, not hand-edited
 </tr>
 <tr>
 <td align="center" width="130">
-<img src="https://cdn.simpleicons.org/bitcoin/F7931A" width="25" alt="BTC"/><br/>
-<sub><b>Bitcoin</b></sub>
+<img src="https://cdn.simpleicons.org/tether/50AF95" width="25" alt="USDT"/><br/>
+<sub><b>USDT</b></sub><br/>
+<sub>Polygon (POL)</sub>
 </td>
 <td>
 
 ```text
-bc1q9a8dr55jgfae0mhevw3vvczegjv0khfp0ngrnv
+0x3955abc6f5396e57b11a05b96f988bc60708c9b0
 ```
 
 </td>
 </tr>
 <tr>
 <td align="center" width="130">
-<img src="https://cdn.simpleicons.org/ethereum/627EEA" width="25" alt="ETH"/><br/>
-<sub><b>Ethereum</b></sub>
+<img src="https://cdn.simpleicons.org/tether/50AF95" width="25" alt="USDT"/><br/>
+<sub><b>USDT</b></sub><br/>
+<sub>TRC20</sub>
 </td>
 <td>
 
 ```text
-0x0BaAeEA44Ce08c8DC139224ff57563695B30d423
+TLYf28vZeuuHcEJMHSZtuYEzQ2DjNvNE3W
+```
+
+</td>
+</tr>
+<tr>
+<td align="center" width="130">
+<img src="https://cdn.simpleicons.org/tether/50AF95" width="25" alt="USDT"/><br/>
+<sub><b>USDT</b></sub><br/>
+<sub>Solana</sub>
+</td>
+<td>
+
+```text
+6sYK6Nss8cjLeeTp6u3t63JG4f1hFf8sDQ7nVtMNoyps
+```
+
+</td>
+</tr>
+<tr>
+<td align="center" width="130">
+<img src="https://cdn.simpleicons.org/ton/0098EA" width="25" alt="TON"/><br/>
+<sub><b>TON</b></sub><br/>
+<sub>TON network</sub>
+</td>
+<td>
+
+```text
+UQDfywxsnHI1ko_uqBYKED3RoMzoVm3mnxuS_-JVQc4mSSJt
 ```
 
 </td>
