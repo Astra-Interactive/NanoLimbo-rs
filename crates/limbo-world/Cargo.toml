@@ -1,0 +1,18 @@
+[package]
+name = "limbo-world"
+description = "Dimension codecs and registry tags, selected by protocol version."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+bytes.workspace = true
+flate2.workspace = true
+limbo-protocol = { path = "../limbo-protocol" }
+thiserror.workspace = true
+valence_nbt.workspace = true
+
+[lints]
+workspace = true
