@@ -1,0 +1,80 @@
+# Configuration for a containerised server.
+#
+# The only differences from the shipped default are the two a container needs:
+#   - bind.ip is empty, so the server listens on every interface rather than on the
+#     container's own loopback, which nothing outside it can reach;
+#   - the port is the conventional Minecraft one, so `-p 25565:25565` reads naturally.
+#
+# Everything else is left as shipped. See ../crates/limbo-config/resources/settings.yml
+# for the fully commented original.
+
+bind:
+  ip: ""
+  port: 25577
+
+maxPlayers: 100
+
+ping:
+  description: "<gradient:blue:white>NanoLimbo"
+  version: "<gradient:blue:white>NanoLimbo"
+  protocol: -1
+
+dimension: THE_END
+
+playerList:
+  enable: true
+  username: "NanoLimbo"
+
+headerAndFooter:
+  enable: true
+  header: "<white>Welcome!"
+  footer: "<gradient:blue:white>NanoLimbo"
+
+gameMode: 3
+secureProfile: false
+
+brandName:
+  enable: true
+  content: "<gradient:blue:white>NanoLimbo"
+
+joinMessage:
+  enable: true
+  text: "<white>Welcome to the <gradient:blue:white>NanoLimbo<white>!"
+
+bossBar:
+  enable: true
+  text: "<white>Welcome to the <gradient:blue:white>NanoLimbo<white>!"
+  health: 1.0
+  color: BLUE
+  division: SOLID
+
+title:
+  enable: true
+  title: "<white><b>Welcome!"
+  subtitle: "<gradient:blue:white>NanoLimbo"
+  fadeIn: 10
+  stay: 100
+  fadeOut: 10
+
+infoForwarding:
+  type: NONE
+  secret: "<YOUR_SECRET_HERE>"
+  tokens:
+  - "<BUNGEE_GUARD_TOKEN>"
+
+readTimeout: 30000
+logPlayersIp: true
+debugLevel: 2
+
+netty:
+  transportType: EPOLL
+  threads:
+    bossGroup: 1
+    workerGroup: 4
+
+traffic:
+  enable: true
+  maxPacketSize: 8192
+  interval: 7.0
+  maxPacketRate: 500.0
+  maxPacketBytesRate: 2048.0

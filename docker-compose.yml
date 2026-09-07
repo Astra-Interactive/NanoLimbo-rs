@@ -1,0 +1,43 @@
+# Runs the server, and optionally the Java original beside it for comparison.
+#
+#   docker compose up --build
+#       The Rust server alone, on 25565.
+#
+#   docker compose --profile compare up --build
+#       Both servers, Rust on 25565 and Java on 25577, so the two can be measured
+#       against each other. The Java service runs a jar you have already built:
+#           (cd .. && ./gradlew shadowJar)
+#
+#   ./bench/compare-docker.sh
+#       Loads both and prints the table, reading memory from the containers.
+
+services:
+  nanolimbo:
+    build:
+      context: .
+    image: nanolimbo:local
+    ports:
+      - "25565:25565"
+    volumes:
+      # Read-only: the file is edited on the host, not in the container. Remove this line
+      # and the server writes its own default into the volume on first run.
+      - ./docker/settings.yml.example:/data/settings.yml:ro
+    restart: unless-stopped
+    # The console reads standard input. Without these it sees end-of-file at once and
+    # simply stops listening for commands, which is fine for an unattended deployment.
+    stdin_open: true
+    tty: true
+    # No healthcheck: the image has no shell and no tools to run one with, which is the
+    # point of it. Check the port from outside instead.
+
+  nanolimbo-java:
+    profiles: ["compare"]
+    image: eclipse-temurin:21-jre
+    working_dir: /data
+    command: ["java", "-jar", "/opt/nanolimbo/NanoLimbo.jar"]
+    ports:
+      - "25577:25577"
+    volumes:
+      - ../build/libs/NanoLimbo.jar:/opt/nanolimbo/NanoLimbo.jar:ro
+      - ./docker/java-settings.yml:/data/settings.yml:ro
+    restart: "no"

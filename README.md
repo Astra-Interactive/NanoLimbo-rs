@@ -37,6 +37,70 @@ without editing the file.
 `help`, `conn`, `mem`, `version` (`ver`), `stop`. `Ctrl-C` and `SIGTERM` also stop it
 cleanly.
 
+## Measuring it against the Java build
+
+The figures below are reproducible rather than something to take on trust. `limbo-bench`
+logs a crowd of players into one or more servers and reports what each one cost; it speaks
+the protocol through the same version tables the server does, so a new Minecraft release
+cannot leave it silently measuring a failed login.
+
+```sh
+./bench/compare.sh                  # both servers, 300 players, newest protocol
+./bench/compare.sh --players 1000
+./bench/compare.sh --protocol 47    # join as 1.8 instead
+```
+
+It builds both, starts them on the same configuration, logs the players in and reads both
+servers' memory from one place at one moment:
+
+```
+target       asked  joined      time       idle      loaded   mem/player  sent/player
+------------------------------------------------------------------------------------
+rust           200     200     0.07s    22.7 MB     34.9 MB      62.5 KB     153.4 KB
+java           200     200     0.19s   118.6 MB    159.3 MB     208.3 KB     153.4 KB
+```
+
+The Java side is skipped with a note when no jar has been built; build one with
+`(cd .. && ./gradlew shadowJar)`. Java's resident figure is shaped by its heap settings,
+so this is an out-of-the-box comparison rather than the best either runtime can do.
+
+`sent/player` matching to the byte is worth noticing: it says both servers put the same
+thing on the wire, which is the whole point of the parity work.
+
+`limbo-bench` can also be pointed at anything already running:
+
+```sh
+cargo run --release --bin limbo-bench -- --players 500 rust=127.0.0.1:25565@$(pgrep nanolimbo)
+```
+
+The `@pid` is optional — without it the server is still load-tested, only its memory goes
+unreported.
+
+## Containers
+
+```sh
+docker compose up --build
+```
+
+The image is a statically linked binary on `scratch`: nothing to patch, nothing to exec
+into, and no shell for an attacker to find. It runs unprivileged as uid 65532 and reads
+its configuration from `/data`.
+
+`docker/settings.yml.example` is the shipped configuration with the two changes a
+container needs — an empty `bind.ip` so it listens on every interface rather than on its
+own loopback, and the conventional port. Compose mounts it read-only; edit it on the host.
+Remove the mount and the server writes its own default into the volume instead.
+
+To compare against the Java build in containers:
+
+```sh
+(cd .. && ./gradlew shadowJar)
+./bench/compare-docker.sh
+```
+
+That brings both up under the `compare` profile and reads memory with `docker stats`, so
+the figures count whole containers rather than single processes.
+
 ## Layout
 
 ```
@@ -48,12 +112,14 @@ crates/
   limbo-net        framing, traffic limits, identity, proxy forwarding
   limbo-config     settings.yml
   limbo-server     connection lifecycle and decision making, with no I/O
+  limbo-bench      load generator and the side-by-side comparison
   nanolimbo        the binary: composition root and async runtime
 fixtures/          reference data the port is verified against
 ```
 
-The bottom four crates hold no sockets and no clock, so the whole login sequence is
-replayed for all 51 versions in unit tests that run in milliseconds.
+Everything except `nanolimbo` and `limbo-bench` holds no sockets and no clock, so the
+whole login sequence is replayed for all 51 versions in unit tests that run in
+milliseconds.
 
 ## Differences from the Java implementation
 

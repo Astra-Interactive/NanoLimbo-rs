@@ -1,0 +1,16 @@
+[package]
+name = "limbo-bench"
+description = "Load generator and side-by-side comparison for limbo servers."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+limbo-protocol = { path = "../limbo-protocol" }
+thiserror.workspace = true
+tokio.workspace = true
+
+[lints]
+workspace = true
