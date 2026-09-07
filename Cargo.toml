@@ -19,7 +19,9 @@ unwrap_used = "warn"
 expect_used = "warn"
 
 [workspace.dependencies]
+bytes = "1"
 thiserror = "2"
+uuid = "1"
 
 [profile.release]
 lto = true
