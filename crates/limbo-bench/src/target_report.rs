@@ -49,6 +49,10 @@ fn kilobytes(bytes: Option<f64>) -> String {
     }
 }
 
+/// Below this many players the per-player figure is mostly startup noise: a runtime that
+/// allocates in chunks, or warms up as it goes, spreads a fixed cost over too few players.
+const RELIABLE_PLAYER_COUNT: usize = 200;
+
 /// Prints the comparison as a table, widest column first so the numbers line up.
 pub fn print_table(reports: &[TargetReport]) {
     println!(
@@ -68,6 +72,16 @@ pub fn print_table(reports: &[TargetReport]) {
             megabytes(report.loaded_memory),
             kilobytes(report.per_player_bytes()),
             kilobytes(report.join_bytes.map(|bytes| bytes as f64)),
+        );
+    }
+
+    if reports
+        .iter()
+        .any(|report| report.logged_in < RELIABLE_PLAYER_COUNT)
+    {
+        println!(
+            "\nFewer than {RELIABLE_PLAYER_COUNT} players joined, so mem/player is mostly \
+             startup cost spread thin. Raise --players for a figure worth quoting."
         );
     }
 
