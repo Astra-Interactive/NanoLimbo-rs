@@ -4,7 +4,7 @@
 #   docker build -t nanolimbo .
 #   docker run --rm -p 25565:25565 -v ./docker/settings.yml:/data/settings.yml:ro nanolimbo
 
-FROM rust:1.93-alpine AS build
+FROM rust:1.98-alpine AS build
 
 # musl-dev provides the linker; every dependency in this workspace is pure Rust, so
 # nothing else is needed and the result links statically.
