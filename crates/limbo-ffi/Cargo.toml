@@ -1,0 +1,32 @@
+[package]
+name = "limbo-ffi"
+description = "A C ABI for embedding the limbo server in a host process."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# cdylib is what a host loads; rlib is what `cargo test` needs to build a test harness
+# against, so the unit tests below are not lost to the crate type.
+[lib]
+name = "nanolimbo_lib"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+nanolimbo = { path = "../nanolimbo" }
+tokio.workspace = true
+tracing.workspace = true
+
+# This crate deliberately does not inherit `[workspace.lints]`. The workspace forbids
+# `unsafe_code`, and `forbid` cannot be lifted from the inside - which is the point of it.
+# A C ABI cannot be expressed without raw pointers, so this one crate opts out, and every
+# other workspace lint is restated here so that opting out of one is not opting out of all.
+[lints.rust]
+unsafe_code = "allow"
+
+[lints.clippy]
+indexing_slicing = "warn"
+panic = "warn"
+unwrap_used = "warn"
+expect_used = "warn"
