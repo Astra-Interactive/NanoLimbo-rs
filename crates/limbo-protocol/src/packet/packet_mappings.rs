@@ -332,15 +332,14 @@ pub(crate) static PLAY_CLIENTBOUND: &[PacketMapping] = &[
         0x1A,
         VersionRange::new(ProtocolVersion::V1_19_4, ProtocolVersion::V1_20),
     ),
+    // Diverges from the Java table, which drops to 0x15 on 1.20.3 — a copy of the
+    // serverbound KeepAlive line above it. 1.20.3 inserted no clientbound packet below
+    // 0x42, so the id does not move; 0x15 is set_slot there. Confirmed by
+    // PrismarineJS/minecraft-data and Velocity's StateRegistry.
     PacketMapping::new(
         PacketKind::Disconnect,
         0x1B,
-        VersionRange::new(ProtocolVersion::V1_20_2, ProtocolVersion::V1_20_2),
-    ),
-    PacketMapping::new(
-        PacketKind::Disconnect,
-        0x15,
-        VersionRange::new(ProtocolVersion::V1_20_3, ProtocolVersion::V1_20_3),
+        VersionRange::new(ProtocolVersion::V1_20_2, ProtocolVersion::V1_20_3),
     ),
     PacketMapping::new(
         PacketKind::Disconnect,
