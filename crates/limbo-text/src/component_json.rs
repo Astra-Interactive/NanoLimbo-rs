@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use serde_json::{Map, Value};
 
 use crate::chat::{
@@ -23,6 +25,8 @@ fn color_value(color: TextColor, profile: JsonProfile) -> Value {
 }
 
 fn click_event_value(event: &ClickEvent, profile: JsonProfile) -> Value {
+    // `action` first, then the payload, which is the order the reference emits and
+    // happens to be alphabetical for every payload key the protocol has used.
     let mut object = Map::new();
     object.insert(
         "action".to_owned(),
@@ -38,7 +42,7 @@ fn click_event_value(event: &ClickEvent, profile: JsonProfile) -> Value {
 /// Writes the parts of a style that are set, leaving the rest absent so the component
 /// inherits them.
 fn insert_style(
-    target: &mut Map<String, Value>,
+    target: &mut BTreeMap<String, Value>,
     style: &Style,
     profile: JsonProfile,
     hover_payload: impl Fn(&Component) -> Value,
@@ -100,7 +104,32 @@ pub(crate) fn build_value(component: &Component, profile: JsonProfile, compactio
         return Value::String(text.clone());
     }
 
+    // Style and children are written before the content field, and alphabetically among
+    // themselves. That ordering is wire-visible, and it is not plain alphabetical: the
+    // reference implementation emits `underlined` before `text`.
+    let mut leading: BTreeMap<String, Value> = BTreeMap::new();
+
+    insert_style(&mut leading, &component.style, profile, |hover| {
+        build_value(hover, profile, compaction)
+    });
+
+    if !component.children.is_empty() {
+        leading.insert(
+            "extra".to_owned(),
+            Value::Array(
+                component
+                    .children
+                    .iter()
+                    .map(|child| build_value(child, profile, compaction))
+                    .collect(),
+            ),
+        );
+    }
+
     let mut object = Map::new();
+    for (key, value) in leading {
+        object.insert(key, value);
+    }
 
     match &component.content {
         ComponentContent::Text { text } => {
@@ -123,23 +152,6 @@ pub(crate) fn build_value(component: &Component, profile: JsonProfile, compactio
         ComponentContent::Keybind { keybind } => {
             object.insert("keybind".to_owned(), Value::String(keybind.clone()));
         }
-    }
-
-    insert_style(&mut object, &component.style, profile, |hover| {
-        build_value(hover, profile, compaction)
-    });
-
-    if !component.children.is_empty() {
-        object.insert(
-            "extra".to_owned(),
-            Value::Array(
-                component
-                    .children
-                    .iter()
-                    .map(|child| build_value(child, profile, compaction))
-                    .collect(),
-            ),
-        );
     }
 
     Value::Object(object)

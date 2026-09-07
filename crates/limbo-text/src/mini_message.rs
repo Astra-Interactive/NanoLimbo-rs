@@ -311,21 +311,95 @@ impl ColorSpread {
     }
 }
 
-/// Builds a component for a tag, folding a lone plain-text child into it.
-///
-/// Without the fold, `<red>text` would produce an empty component wrapping a text one.
-/// The reference implementation collapses that, and so does this — but only when the
-/// child carries nothing of its own to lose.
-fn assemble(style: Style, mut children: Vec<Component>) -> Component {
-    let absorbable = children.first().is_some_and(|first| {
-        matches!(first.content, ComponentContent::Text { .. })
-            && first.style.is_empty()
-            && first.children.is_empty()
-    });
+/// Whether a component carries no text of its own, whatever its children carry.
+fn has_empty_content(component: &Component) -> bool {
+    matches!(&component.content, ComponentContent::Text { text } if text.is_empty())
+}
 
-    if absorbable && !children.is_empty() {
+/// Whether a component is a bare piece of text with nothing hanging off it.
+fn is_text_leaf(component: &Component) -> bool {
+    matches!(component.content, ComponentContent::Text { .. }) && component.children.is_empty()
+}
+
+/// Overlays `child` on `parent`, with the child winning wherever it sets something.
+fn overlay(parent: &Style, child: &Style) -> Style {
+    let mut merged = parent.clone();
+    if child.color.is_some() {
+        merged.color = child.color;
+    }
+    if child.font.is_some() {
+        merged.font = child.font.clone();
+    }
+    if child.insertion.is_some() {
+        merged.insertion = child.insertion.clone();
+    }
+    if child.click_event.is_some() {
+        merged.click_event = child.click_event.clone();
+    }
+    if child.hover_event.is_some() {
+        merged.hover_event = child.hover_event.clone();
+    }
+    for (target, source) in [
+        (&mut merged.bold, child.bold),
+        (&mut merged.italic, child.italic),
+        (&mut merged.underlined, child.underlined),
+        (&mut merged.strikethrough, child.strikethrough),
+        (&mut merged.obfuscated, child.obfuscated),
+    ] {
+        if source.is_some() {
+            *target = source;
+        }
+    }
+    merged
+}
+
+/// Joins neighbouring pieces of text that carry the same style.
+///
+/// `<newline>` and an escaped bracket both split a run of text into several nodes, and
+/// the reference implementation puts them back together. Two adjacent components with the
+/// same style render as one, so leaving them apart would be a visible difference in the
+/// bytes and none at all on screen.
+fn join_adjacent_text(components: Vec<Component>) -> Vec<Component> {
+    let mut joined: Vec<Component> = Vec::with_capacity(components.len());
+
+    for component in components {
+        let mergeable = joined.last().is_some_and(|previous| {
+            is_text_leaf(previous) && is_text_leaf(&component) && previous.style == component.style
+        });
+
+        match (mergeable, joined.last_mut(), &component.content) {
+            (true, Some(previous), ComponentContent::Text { text }) => {
+                if let ComponentContent::Text { text: existing } = &mut previous.content {
+                    existing.push_str(text);
+                }
+            }
+            _ => joined.push(component),
+        }
+    }
+
+    joined
+}
+
+/// Builds a component for a tag, folding a child into it where the reference does.
+///
+/// Two foldings, both of which the reference implementation performs and both of which
+/// are visible in the bytes:
+///
+/// - a leading child that is bare text becomes the parent's own text, so `<red>a<blue>b`
+///   is one red component with a blue child rather than an empty parent with two;
+/// - an only child that is styled text merges its style upward, so `<white><b>x` is one
+///   component rather than a white parent wrapping a bold child.
+fn assemble(style: Style, children: Vec<Component>) -> Component {
+    let mut children = join_adjacent_text(children);
+
+    let absorbs_plain = children
+        .first()
+        .is_some_and(|first| is_text_leaf(first) && first.style.is_empty());
+    let absorbs_only_styled = children.len() == 1 && children.first().is_some_and(is_text_leaf);
+
+    if absorbs_plain || absorbs_only_styled {
         let first = children.remove(0);
-        return Component::new(first.content, style, children);
+        return Component::new(first.content, overlay(&style, &first.style), children);
     }
 
     Component::new(
@@ -335,6 +409,45 @@ fn assemble(style: Style, mut children: Vec<Component>) -> Component {
         style,
         children,
     )
+}
+
+/// Drops style properties a component would inherit anyway.
+///
+/// `<white>a<white>b` sets white twice; the reference emits it once, because the inner
+/// component is compared against what it inherits and only the differences survive.
+fn unmerge_inherited(component: &mut Component, inherited: &Style) {
+    let resolved = overlay(inherited, &component.style);
+
+    if component.style.color == inherited.color {
+        component.style.color = None;
+    }
+    if component.style.font == inherited.font {
+        component.style.font = None;
+    }
+    if component.style.insertion == inherited.insertion {
+        component.style.insertion = None;
+    }
+    if component.style.click_event == inherited.click_event {
+        component.style.click_event = None;
+    }
+    if component.style.hover_event == inherited.hover_event {
+        component.style.hover_event = None;
+    }
+    for (own, parent) in [
+        (&mut component.style.bold, inherited.bold),
+        (&mut component.style.italic, inherited.italic),
+        (&mut component.style.underlined, inherited.underlined),
+        (&mut component.style.strikethrough, inherited.strikethrough),
+        (&mut component.style.obfuscated, inherited.obfuscated),
+    ] {
+        if *own == parent {
+            *own = None;
+        }
+    }
+
+    for child in &mut component.children {
+        unmerge_inherited(child, &resolved);
+    }
 }
 
 fn spread_text(text: &str, spread: &mut ColorSpread) -> Vec<Component> {
@@ -421,6 +534,78 @@ fn inline_component(name: &str, arguments: &[String]) -> Option<Component> {
     }
 }
 
+/// Builds a colour-spreading tag: `<gradient>` or `<rainbow>`.
+///
+/// The ramp covers the tag's own text and stops there. Text inside a nested tag is left
+/// alone and sits beside the spread run rather than inside it, which is why
+/// `<gradient:blue:white>Nano<white>!` ends the ramp on the `o` and leaves the `!` white.
+fn build_spread(name: &str, arguments: &[String], children: &[MiniMessageNode]) -> Component {
+    let stops: Vec<TextColor> = arguments
+        .iter()
+        .filter_map(|argument| parse_color(argument))
+        .collect();
+    let mut spread = ColorSpread {
+        stops: if stops.is_empty() {
+            vec![TextColor::Named(NamedColor::White)]
+        } else {
+            stops
+        },
+        rainbow: name == "rainbow",
+        // The ramp is measured over every character the tag encloses, nested tags
+        // included, even though only the tag's own text is coloured by it.
+        total: children.iter().map(MiniMessageNode::text_length).sum(),
+        position: 0,
+    };
+
+    let mut parts: Vec<Component> = Vec::new();
+    let mut ramped: Vec<Component> = Vec::new();
+
+    for node in children {
+        match node {
+            MiniMessageNode::Text { text } => ramped.extend(spread_text(text, &mut spread)),
+            MiniMessageNode::Tag {
+                name: child_name,
+                arguments: child_arguments,
+                raw,
+                children: grandchildren,
+            } => {
+                if !ramped.is_empty() {
+                    parts.push(wrap(std::mem::take(&mut ramped)));
+                }
+                // The nested tag paints its own text, but the ramp still steps over it,
+                // so what follows resumes where it would have been.
+                spread.position += node.text_length();
+                parts.extend(build_tag(
+                    child_name,
+                    child_arguments,
+                    raw,
+                    grandchildren,
+                    &mut None,
+                ));
+            }
+        }
+    }
+    if !ramped.is_empty() {
+        parts.push(wrap(std::mem::take(&mut ramped)));
+    }
+
+    match parts.len() {
+        1 => parts.remove(0),
+        _ => wrap(parts),
+    }
+}
+
+/// A component that contributes nothing of its own and exists to group its children.
+fn wrap(children: Vec<Component>) -> Component {
+    Component::new(
+        ComponentContent::Text {
+            text: String::new(),
+        },
+        Style::empty(),
+        children,
+    )
+}
+
 fn build_nodes(nodes: &[MiniMessageNode], spread: &mut Option<ColorSpread>) -> Vec<Component> {
     let mut built = Vec::new();
 
@@ -454,22 +639,7 @@ fn build_tag(
     }
 
     if name == "gradient" || name == "rainbow" {
-        let total = children.iter().map(MiniMessageNode::text_length).sum();
-        let stops: Vec<TextColor> = arguments
-            .iter()
-            .filter_map(|argument| parse_color(argument))
-            .collect();
-        let mut nested = Some(ColorSpread {
-            stops: if stops.is_empty() {
-                vec![TextColor::Named(NamedColor::White)]
-            } else {
-                stops
-            },
-            rainbow: name == "rainbow",
-            total,
-            position: 0,
-        });
-        return vec![assemble(Style::empty(), build_nodes(children, &mut nested))];
+        return vec![build_spread(name, arguments, children)];
     }
 
     match style_for_tag(name, arguments) {
@@ -483,14 +653,56 @@ fn build_tag(
     }
 }
 
+/// Removes wrappers that group a single child, which group nothing.
+///
+/// A wrapper with several children decides how they nest and has to stay; one with a
+/// single child says nothing the child does not already say, and the reference
+/// implementation drops it. Applied after the tree is built, because whether a wrapper
+/// ends up with one child or many is only known then.
+fn collapse_lone_wrappers(component: &mut Component) {
+    for child in &mut component.children {
+        collapse_lone_wrappers(child);
+    }
+
+    let replacements: Vec<Component> = std::mem::take(&mut component.children)
+        .into_iter()
+        .map(|child| {
+            let redundant =
+                has_empty_content(&child) && child.style.is_empty() && child.children.len() == 1;
+            match redundant {
+                true => child
+                    .children
+                    .into_iter()
+                    .next()
+                    .unwrap_or_else(Component::empty),
+                false => child,
+            }
+        })
+        .collect();
+    component.children = replacements;
+}
+
 /// Parses MiniMessage markup into a component.
 pub fn parse_mini_message(input: &str) -> Component {
     let nodes = parse_nodes(input);
     let mut built = build_nodes(&nodes, &mut None);
 
-    match built.len() {
+    let mut root = match built.len() {
         0 => Component::empty(),
+        // The document collapses onto a lone child unless that child is an empty shell
+        // holding others - which is what a colour-spreading tag produces, and what the
+        // reference keeps as its own level.
+        1 if built
+            .first()
+            .is_some_and(|only| !only.children.is_empty() && has_empty_content(only)) =>
+        {
+            assemble(Style::empty(), built)
+        }
         1 => built.remove(0),
         _ => assemble(Style::empty(), built),
-    }
+    };
+
+    collapse_lone_wrappers(&mut root);
+    unmerge_inherited(&mut root, &Style::empty());
+    root
 }
