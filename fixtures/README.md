@@ -29,6 +29,37 @@ that code is written from scratch and has nothing but these bytes to check it.
 Each entry also records `legacy` and `plain` renderings, used for the server brand, the
 ping version string and log output.
 
+## `packets/clientbound.json`
+
+Every clientbound packet the server can send, encoded for every version it is sent to,
+grouped by shared encoding. Payloads only — the id prefix is not included, because the id
+is recorded separately.
+
+Each entry also lists the packet id per version. That is a **third** check on the id
+tables, independent of both the hand-ported table and minecraft-data.
+
+Packets are dumped only for versions where the server actually has an id for them, so the
+fixture describes what can be sent rather than what an encoder happens to produce when
+asked for an impossible combination.
+
+Values the server would draw from a random source are fixed here: entity id 1337,
+teleport id 7654321, and UUIDs of the form `00000000-0000-4000-8000-00000000000N`. The
+port must accept these through an injected `IdSource` rather than calling a global random,
+which is why that port exists at all — see MIGRATION_PLAN.md section 7.5.
+
+## `packets/update_tags.json`
+
+Update tags is the one packet whose bytes are **not** comparable against Java.
+`DimensionRegistry.parseUpdateTags` collects into a `HashMap`, so the order it serializes
+in is an artifact of Java's hashing rather than anything the protocol specifies. Demanding
+the port reproduce that order would be both impossible and pointless.
+
+So this records content instead: per-registry tag and id counts, plus a SHA-256 over
+registries and tags sorted by name. A mismatch in the digest says the content differs; the
+counts say which registry to look at.
+
+If a future test tries to byte-compare this packet against Java, it is wrong.
+
 ## `uuid/offline.json`
 
 `UUID.nameUUIDFromBytes("OfflinePlayer:" + name)` for a range of usernames including
