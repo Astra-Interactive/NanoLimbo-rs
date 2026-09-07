@@ -72,6 +72,16 @@ docker run -d --name nanolimbo -p 25565:25565 \
   ghcr.io/astra-interactive/nanolimbo-rs:latest
 ```
 
+**Pterodactyl** — import an egg from [`pterodactyl/eggs`](pterodactyl/eggs), Alpine or
+Debian, and the panel installs the matching release build and keeps `settings.yml`
+pointed at the allocation it gave you.
+
+**Inside a proxy** — [`nanolimbo_java_wrapper.jar`](https://github.com/Astra-Interactive/NanoLimbo-rs/releases/latest)
+runs the server in your Velocity or BungeeCord process, no second service to supervise.
+Drop it in `plugins/`; its configuration appears in `plugins/nanolimbo_java_wrapper/settings.yml`.
+The same jar runs standalone with `java -jar nanolimbo_java_wrapper.jar [directory]`,
+and carries native builds for Linux, macOS and Windows on x86-64 and ARM64.
+
 **From source** — needs Rust 1.93:
 
 ```sh
@@ -207,8 +217,11 @@ crates/
   limbo-config     settings.yml
   limbo-server     connection lifecycle and decision making, with no I/O
   limbo-bench      load generator and the side-by-side comparison
+  limbo-ffi        the C ABI a host process embeds the server through
   nanolimbo        the binary: composition root and async runtime
 fixtures/          reference data the port is verified against
+java-wrapper/      the JNA wrapper that runs the server inside a proxy
+pterodactyl/eggs/  panel eggs, Alpine and Debian
 ```
 
 Everything except `nanolimbo` and `limbo-bench` holds no sockets and no clock, so the
