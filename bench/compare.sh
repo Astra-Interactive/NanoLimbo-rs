@@ -1,24 +1,44 @@
 #!/usr/bin/env bash
 #
-# Runs the Rust and Java servers side by side and prints what each one costs.
+# Loads this server, and optionally the Java original beside it, and prints what each costs.
 #
 # This is the measurement in MIGRATION_PLAN.md section 9, made reproducible. Both servers
 # get the same settings.yml, the same number of players and the same client, and their
 # memory is read from one place at one moment rather than from two tools at two times.
 #
-#   ./bench/compare.sh                 300 players, newest protocol
+#   ./bench/compare.sh                              this server alone
 #   ./bench/compare.sh --players 1000
-#   ./bench/compare.sh --protocol 47   log in as 1.8 instead
+#   ./bench/compare.sh --protocol 47                log in as 1.8 instead
+#   ./bench/compare.sh --jar ../NanoLimbo.jar       compare against the original
 #
-# The Java side is skipped, with a note, when no jar has been built.
+# Upstream lives in a separate repository, so its jar has to be pointed at rather than
+# assumed. Build one with:
+#
+#   git clone https://github.com/Nan1t/NanoLimbo && cd NanoLimbo && ./gradlew shadowJar
 
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(cd "$here/.." && pwd)"
-java_root="$(cd "$root/.." && pwd)"
-jar="$java_root/build/libs/NanoLimbo.jar"
 settings="$root/crates/limbo-config/resources/settings.yml"
+
+# --jar is ours; everything else is passed through to limbo-bench untouched, so its own
+# options need no mirroring here.
+jar="${NANOLIMBO_JAR:-}"
+bench_arguments=()
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --jar)
+            [ $# -ge 2 ] || { echo "--jar expects a path" >&2; exit 1; }
+            jar="$2"
+            shift 2
+            ;;
+        *)
+            bench_arguments+=("$1")
+            shift
+            ;;
+    esac
+done
 
 rust_port=25578
 java_port=25577
@@ -67,18 +87,29 @@ wait_for_port "$rust_port" rust
 
 targets=("rust=127.0.0.1:$rust_port@$rust_pid")
 
-if [ -f "$jar" ]; then
+# Each server runs from its own working directory, so a path relative to the caller's
+# would be resolved against the wrong one.
+if [ -n "$jar" ] && [ -f "$jar" ]; then
+    jar="$(cd "$(dirname "$jar")" && pwd)/$(basename "$jar")"
+fi
+
+if [ -n "$jar" ] && [ -f "$jar" ]; then
     prepare_config "$work/java" "$java_port"
     (cd "$work/java" && exec java -jar "$jar") > "$work/java.log" 2>&1 &
     java_pid=$!
     wait_for_port "$java_port" java
     targets+=("java=127.0.0.1:$java_port@$java_pid")
+elif [ -n "$jar" ]; then
+    echo
+    echo "No jar at $jar, so only this server is measured." >&2
 else
     echo
-    echo "No Java jar at $jar, so only the Rust server is measured."
-    echo "Build it with:  (cd $java_root && ./gradlew shadowJar)"
+    echo "Measuring this server alone. Pass --jar <path to NanoLimbo.jar> to compare"
+    echo "against the original."
 fi
 
-"$root/target/release/limbo-bench" "$@" "${targets[@]}"
+"$root/target/release/limbo-bench" "${bench_arguments[@]}" "${targets[@]}"
 
-echo "Java heap settings shape its resident figure; this is an out-of-the-box comparison."
+if [ -n "$java_pid" ]; then
+    echo "Java heap settings shape its resident figure; this is an out-of-the-box comparison."
+fi

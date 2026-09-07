@@ -7,7 +7,7 @@ Two independent oracles live here, and the distinction matters:
 
 | Directory | Oracle | Proves |
 |---|---|---|
-| `text/`, `uuid/` | the Java implementation in `../../src` | the port is byte-equivalent to a build that has run in production across all 51 versions |
+| `text/`, `uuid/` | [Nan1t/NanoLimbo](https://github.com/Nan1t/NanoLimbo), the implementation being ported | the port is byte-equivalent to a build that has run in production across all 51 versions |
 | `minecraft-data/` | [PrismarineJS/minecraft-data](https://github.com/PrismarineJS/minecraft-data) | the tables are right independently of Java, so a bug shared by both implementations is still caught |
 
 Do not mistake the `packets/` ids for a third oracle: they are Java's own, and inherit
@@ -85,39 +85,15 @@ identity keys the connection registry, so a mismatch changes who a player *is*.
 
 ## Regenerating
 
-The dumper lives in the Java tree at `src/main/java/ua/nanit/limbo/tools/FixtureDumper.java`.
-It is not part of the server and is never started by it.
+The tool that produces these lives in `generator/`, with its own instructions. It needs a
+checkout of the upstream Java project to compile against, which is why the recipe is a few
+steps rather than one command — upstream is a separate repository and has no reason to
+carry a tool only this port needs.
 
-```sh
-cd ..            # repository root, the Java project
-./gradlew shadowJar
-java -cp build/libs/NanoLimbo.jar ua.nanit.limbo.tools.FixtureDumper rust/fixtures
-```
+Everything except `packets/clientbound.json` reproduces byte for byte. That one cannot:
+two of its entries carry NBT whose compound key order Java randomises per JVM run, as the
+section above explains.
 
-Values the server would normally draw from a random source or a clock are passed in fixed,
-so regenerating on an unchanged Java tree reproduces `text/`, `uuid/` and
-`packets/update_tags.json` byte for byte. A diff there without a deliberate Java change is
-a bug.
-
-**`packets/clientbound.json` is the exception, and deliberately so.** Two of its entries
-differ on every run:
-
-- `registry_data_legacy`, whose whole payload is one NBT compound;
-- `join_game`, but only for protocols 735 and 736 — the versions where the join packet
-  embeds the full dimension codec.
-
-The content is identical; only the order of NBT compound keys moves. Java's
-`ImmutableCollections` randomises the iteration order of `Map.of`/`Map.copyOf` per JVM run
-by design, and Adventure's `CompoundBinaryTag` is built on one. The Java server therefore
-sends its registries in a different key order after every restart, which clients do not
-mind because NBT compounds are unordered.
-
-So those two are verified **structurally** — parse both sides and compare with compound
-keys sorted — while every other packet stays a strict byte comparison. Do not turn the
-exception into a byte comparison, and do not widen it to cover a genuine mismatch.
-
-The port is better behaved here: `valence_nbt` with `preserve_order` emits keys in
-resource-file order, so our output is byte-stable across restarts.
-
-Once the Java tree is retired these files stop being derived from it and become
-self-hosted regression snapshots — see MIGRATION_PLAN.md section 7.8.
+Once the versions these cover are all verified, they stop being derived from upstream at
+all and become self-hosted regression snapshots — only a genuinely new Minecraft version
+needs new reference bytes. See MIGRATION_PLAN.md section 7.8.

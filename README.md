@@ -4,8 +4,13 @@ A lightweight Minecraft limbo server: it accepts a player, walks them through th
 sequence, parks them in empty space and keeps the connection alive while the real server
 is down. It runs no game logic — there is no world, no physics, no inventory.
 
-A port of the Java implementation in `../src`, which remains the behavioural reference.
+A port of [Nan1t/NanoLimbo](https://github.com/Nan1t/NanoLimbo), which remains the
+behavioural reference: this project is verified against byte-level dumps taken from it.
 See `MIGRATION_PLAN.md` for the architecture, the phased plan, and the testing strategy.
+
+This repository stands alone. The reference dumps it is checked against are committed in
+`fixtures/`, together with the tool that produces them, so nothing here depends on having
+the upstream project checked out.
 
 ## Status
 
@@ -45,12 +50,12 @@ the protocol through the same version tables the server does, so a new Minecraft
 cannot leave it silently measuring a failed login.
 
 ```sh
-./bench/compare.sh                  # both servers, 300 players, newest protocol
-./bench/compare.sh --players 1000
-./bench/compare.sh --protocol 47    # join as 1.8 instead
+./bench/compare.sh --players 300                 # this server alone
+./bench/compare.sh --protocol 47                 # join as 1.8 instead
+./bench/compare.sh --jar path/to/NanoLimbo.jar   # against the original
 ```
 
-It builds both, starts them on the same configuration, logs the players in and reads both
+Given a jar it starts both on the same configuration, logs the players in and reads both
 servers' memory from one place at one moment:
 
 ```
@@ -60,9 +65,15 @@ rust           200     200     0.07s    22.7 MB     34.9 MB      62.5 KB     153
 java           200     200     0.19s   118.6 MB    159.3 MB     208.3 KB     153.4 KB
 ```
 
-The Java side is skipped with a note when no jar has been built; build one with
-`(cd .. && ./gradlew shadowJar)`. Java's resident figure is shaped by its heap settings,
-so this is an out-of-the-box comparison rather than the best either runtime can do.
+Upstream lives in its own repository, so its jar is pointed at rather than assumed:
+
+```sh
+git clone https://github.com/Nan1t/NanoLimbo && (cd NanoLimbo && ./gradlew shadowJar)
+```
+
+Java's resident figure is shaped by its heap settings, so this is an out-of-the-box
+comparison rather than the best either runtime can do. Below a couple of hundred players
+the per-player column is mostly startup cost spread thin, and the tool says so.
 
 `sent/player` matching to the byte is worth noticing: it says both servers put the same
 thing on the wire, which is the whole point of the parity work.
@@ -90,16 +101,6 @@ its configuration from `/data`.
 container needs — an empty `bind.ip` so it listens on every interface rather than on its
 own loopback, and the conventional port. Compose mounts it read-only; edit it on the host.
 Remove the mount and the server writes its own default into the volume instead.
-
-To compare against the Java build in containers:
-
-```sh
-(cd .. && ./gradlew shadowJar)
-./bench/compare-docker.sh
-```
-
-That brings both up under the `compare` profile and reads memory with `docker stats`, so
-the figures count whole containers rather than single processes.
 
 ## Layout
 
@@ -139,5 +140,6 @@ Deliberate, and each documented at the site and in `MIGRATION_PLAN.md`:
 
 ## Licence
 
-GPL-3.0-or-later, as the original. This is a derivative work of
-[Nan1t/NanoLimbo](https://github.com/Nan1t/NanoLimbo).
+GPL-3.0-or-later, as the original — see `LICENSE`. This is a derivative work of
+[Nan1t/NanoLimbo](https://github.com/Nan1t/NanoLimbo) by Nan1t and contributors, ported
+rather than rewritten from scratch, and the licence follows accordingly.

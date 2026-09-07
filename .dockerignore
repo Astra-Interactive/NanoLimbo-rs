@@ -1,4 +1,5 @@
+# Build artefacts and history only. Everything else is sent, so the context mirrors the
+# repository and adding a test step to the Dockerfile would not fail for want of fixtures.
 target
 .git
 WORKLOG.md
-bench
