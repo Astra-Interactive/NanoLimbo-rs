@@ -1,0 +1,7 @@
+# testing.md sanctions unwrap/expect in tests; the workspace lints forbid them everywhere
+# else. Configuring it here keeps the exemption in one place instead of an allow attribute
+# at the top of every test module.
+allow-expect-in-tests = true
+allow-unwrap-in-tests = true
+allow-panic-in-tests = true
+allow-indexing-slicing-in-tests = true
