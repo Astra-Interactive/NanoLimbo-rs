@@ -14,6 +14,7 @@ pub mod console_command;
 pub mod forwarding_mode;
 pub mod game_profile;
 pub mod handshake;
+pub mod id_source;
 pub mod login_plugin_response;
 pub mod login_start;
 pub mod memory_usage;
