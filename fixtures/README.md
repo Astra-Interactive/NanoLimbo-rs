@@ -10,10 +10,18 @@ Two independent oracles live here, and the distinction matters:
 | `text/`, `uuid/` | the Java implementation in `../../src` | the port is byte-equivalent to a build that has run in production across all 51 versions |
 | `minecraft-data/` | [PrismarineJS/minecraft-data](https://github.com/PrismarineJS/minecraft-data) | the tables are right independently of Java, so a bug shared by both implementations is still caught |
 
+Do not mistake the `packets/` ids for a third oracle: they are Java's own, and inherit
+Java's mistakes.
+
 Equivalence testing alone inherits the oracle's bugs, which is why the second oracle
-exists. It has already earned its place: it confirmed that the Java packet table mapped
-serverbound configuration `custom_payload` to `0x02` from 1.20.2, where that id is
-`finish_configuration`.
+exists. It has already earned its place twice, finding defects that byte-comparison
+against Java can never find because the port would reproduce them exactly:
+
+- serverbound configuration `custom_payload` mapped to `0x02` from 1.20.2, where that id
+  is `finish_configuration`;
+- clientbound play `Disconnect` mapped to `0x15` on 1.20.3/1.20.4, where that id is
+  `set_slot` — so kicking a player on those versions sent them a malformed packet
+  instead of a disconnect reason.
 
 ## `text/components.json`
 
@@ -35,8 +43,17 @@ Every clientbound packet the server can send, encoded for every version it is se
 grouped by shared encoding. Payloads only — the id prefix is not included, because the id
 is recorded separately.
 
-Each entry also lists the packet id per version. That is a **third** check on the id
-tables, independent of both the hand-ported table and minecraft-data.
+Each entry also lists the packet id per version. This is **not** an independent oracle —
+those ids come out of the same Java table the Rust table was ported from, so agreement
+proves only that the port is faithful, not that either is right. Only
+`minecraft-data/` can say that.
+
+It carries a known consequence: `disconnect_play` records `0x15` for protocol 765,
+which is the defect described in MIGRATION_PLAN.md 3.1.6 (`0x15` is `set_slot` there;
+the correct id is `0x1B`). The Rust table deliberately diverges. The *payload* bytes in
+this fixture are unaffected, since a payload does not depend on the id it travels under,
+so the level 1 byte comparison stands — but any test comparing ids against this file must
+carry that exception explicitly.
 
 Packets are dumped only for versions where the server actually has an id for them, so the
 fixture describes what can be sent rather than what an encoder happens to produce when
