@@ -8,6 +8,7 @@ use std::path::Path;
 use std::process::ExitCode;
 
 use nanolimbo::logging;
+use nanolimbo::shutdown_source::ShutdownSource;
 use nanolimbo::startup::{prepare, serve};
 use nanolimbo::startup_error::StartupError;
 
@@ -30,7 +31,7 @@ fn run() -> Result<(), StartupError> {
     builder
         .build()
         .map_err(StartupError::Runtime)?
-        .block_on(serve(context))
+        .block_on(serve(context, ShutdownSource::Standalone))
 }
 
 fn main() -> ExitCode {

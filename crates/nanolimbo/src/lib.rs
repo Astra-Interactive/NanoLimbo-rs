@@ -13,6 +13,7 @@ pub mod packet_snapshots;
 pub mod prepared_server;
 pub mod random_id_source;
 pub mod server_context;
+pub mod shutdown_source;
 pub mod startup;
 pub mod startup_error;
 pub mod title_snapshots;

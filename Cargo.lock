@@ -261,6 +261,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "limbo-ffi"
+version = "0.3.0"
+dependencies = [
+ "nanolimbo",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "limbo-net"
 version = "0.3.0"
 dependencies = [

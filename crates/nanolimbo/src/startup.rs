@@ -14,6 +14,7 @@ use crate::packet_snapshots::PacketSnapshots;
 use crate::prepared_server::PreparedServer;
 use crate::random_id_source::RandomIdSource;
 use crate::server_context::ServerContext;
+use crate::shutdown_source::ShutdownSource;
 use crate::startup_error::StartupError;
 use crate::{console, listener};
 
@@ -55,32 +56,14 @@ pub fn prepare(root: &Path) -> Result<PreparedServer, StartupError> {
     })
 }
 
-/// Waits for whichever signal comes first, so a container stop is as clean as Ctrl-C.
-async fn wait_for_signal() {
-    #[cfg(unix)]
-    {
-        use tokio::signal::unix::{SignalKind, signal};
-
-        let mut terminate = match signal(SignalKind::terminate()) {
-            Ok(stream) => stream,
-            Err(error) => {
-                tracing::warn!(%error, "cannot listen for SIGTERM; Ctrl-C still works");
-                let _ = tokio::signal::ctrl_c().await;
-                return;
-            }
-        };
-        tokio::select! {
-            _ = tokio::signal::ctrl_c() => {}
-            _ = terminate.recv() => {}
-        }
-    }
-    #[cfg(not(unix))]
-    {
-        let _ = tokio::signal::ctrl_c().await;
-    }
-}
-
-pub async fn serve(context: Arc<ServerContext>) -> Result<(), StartupError> {
+/// Serves connections until the server is asked to stop.
+///
+/// `shutdown_source` decides what "asked to stop" means, which is what lets the same
+/// runtime be driven both by the binary and by a host process that embeds it.
+pub async fn serve(
+    context: Arc<ServerContext>,
+    shutdown_source: ShutdownSource,
+) -> Result<(), StartupError> {
     let address = context.config.bind_address;
     let listener = TcpListener::bind(address)
         .await
@@ -89,12 +72,14 @@ pub async fn serve(context: Arc<ServerContext>) -> Result<(), StartupError> {
     let (shutdown, _) = broadcast::channel(1);
     tracing::info!("Server started on {address}");
 
-    tokio::spawn(console::run(
-        console::read_lines(),
-        Arc::clone(&context.connections),
-        VERSION.to_owned(),
-        shutdown.clone(),
-    ));
+    if shutdown_source.owns_console() {
+        tokio::spawn(console::run(
+            console::read_lines(),
+            Arc::clone(&context.connections),
+            VERSION.to_owned(),
+            shutdown.clone(),
+        ));
+    }
 
     let accepting = tokio::spawn(listener::accept_until_shutdown(
         listener,
@@ -104,7 +89,7 @@ pub async fn serve(context: Arc<ServerContext>) -> Result<(), StartupError> {
 
     let mut stopping = shutdown.subscribe();
     tokio::select! {
-        _ = wait_for_signal() => {}
+        _ = shutdown_source.wait() => {}
         _ = stopping.recv() => {}
     }
 
