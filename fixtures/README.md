@@ -94,9 +94,30 @@ cd ..            # repository root, the Java project
 java -cp build/libs/NanoLimbo.jar ua.nanit.limbo.tools.FixtureDumper rust/fixtures
 ```
 
-Everything it writes is deterministic: values the server would normally draw from a random
-source or a clock are passed in fixed. Regenerating on an unchanged Java tree must produce
-an identical file, and a diff that appears without a deliberate Java change is a bug.
+Values the server would normally draw from a random source or a clock are passed in fixed,
+so regenerating on an unchanged Java tree reproduces `text/`, `uuid/` and
+`packets/update_tags.json` byte for byte. A diff there without a deliberate Java change is
+a bug.
+
+**`packets/clientbound.json` is the exception, and deliberately so.** Two of its entries
+differ on every run:
+
+- `registry_data_legacy`, whose whole payload is one NBT compound;
+- `join_game`, but only for protocols 735 and 736 — the versions where the join packet
+  embeds the full dimension codec.
+
+The content is identical; only the order of NBT compound keys moves. Java's
+`ImmutableCollections` randomises the iteration order of `Map.of`/`Map.copyOf` per JVM run
+by design, and Adventure's `CompoundBinaryTag` is built on one. The Java server therefore
+sends its registries in a different key order after every restart, which clients do not
+mind because NBT compounds are unordered.
+
+So those two are verified **structurally** — parse both sides and compare with compound
+keys sorted — while every other packet stays a strict byte comparison. Do not turn the
+exception into a byte comparison, and do not widen it to cover a genuine mismatch.
+
+The port is better behaved here: `valence_nbt` with `preserve_order` emits keys in
+resource-file order, so our output is byte-stable across restarts.
 
 Once the Java tree is retired these files stop being derived from it and become
 self-hosted regression snapshots — see MIGRATION_PLAN.md section 7.8.
