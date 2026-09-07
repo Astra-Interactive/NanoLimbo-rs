@@ -1,10 +1,3 @@
-// `clippy.toml` sanctions `expect` and `panic` in tests, but clippy only recognises code
-// inside a `#[test]` function, which the module-level helpers of an integration-test
-// crate are not. Marking the file `#![cfg(test)]` would satisfy clippy and compile the
-// whole suite away if that flag were ever absent, which is the one failure this suite
-// must never have.
-#![allow(clippy::expect_used, clippy::panic)]
-
 //! Update tags is the one clientbound packet whose bytes cannot be compared against the
 //! Java implementation: it collects into a `HashMap`, so the order it serializes
 //! registries and tags in is an artifact of Java's hashing rather than anything the
@@ -14,6 +7,13 @@
 //! counts plus a SHA-256 over registries and tags sorted by name. This test encodes the
 //! packet, reads the payload back, and checks the content that comes out, which verifies
 //! the encoder rather than the registry it was handed.
+
+// `clippy.toml` sanctions `expect` and `panic` in tests, but clippy only recognises code
+// inside a `#[test]` function, which the module-level helpers of an integration-test
+// crate are not. Marking the file `#![cfg(test)]` would satisfy clippy and compile the
+// whole suite away if that flag were ever absent, which is the one failure this suite
+// must never have.
+#![allow(clippy::expect_used, clippy::panic)]
 
 use std::collections::BTreeMap;
 use std::fs;

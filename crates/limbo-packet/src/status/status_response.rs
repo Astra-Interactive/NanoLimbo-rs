@@ -45,10 +45,12 @@ pub struct StatusResponse<'a> {
 impl StatusResponse<'_> {
     /// Builds the JSON document the client parses.
     ///
-    /// Assembled by hand rather than through a serializer because the key order is
-    /// wire-visible and has to match Gson's, which writes fields in declaration order:
-    /// `version`, `players`, `description`. A `serde_json::Map` would sort them, and
-    /// enabling `preserve_order` would change how components serialize everywhere else.
+    /// Assembled by hand because the key order is wire-visible and has to match Gson's,
+    /// which writes fields in declaration order: `version`, `players`, `description`.
+    /// Building a `serde_json::Map` instead would hold that order too, but the MOTD
+    /// arrives from `limbo-text` already rendered as JSON text, so it would have to be
+    /// parsed back into a `Value` purely to be written out again — a failure path bought
+    /// for nothing.
     fn to_json(&self, version: ProtocolVersion) -> String {
         format!(
             r#"{{"version":{{"name":{},"protocol":{}}},"players":{{"max":{},"online":{},"sample":{}}},"description":{}}}"#,
