@@ -1,0 +1,34 @@
+name: "read-version"
+description: "Reads the workspace version from a Cargo.toml"
+inputs:
+  manifest-path:
+    description: "Path to the workspace manifest to read"
+    required: false
+    default: "Cargo.toml"
+outputs:
+  version:
+    description: "The [workspace.package] version declared by the manifest"
+    value: ${{ steps.read_version.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    # Parsed rather than grepped: the version is the single value the release tag, the
+    # image tags and the pull request check all agree on, so a match against the wrong
+    # `version =` line elsewhere in the file would be silently wrong instead of loud.
+    - name: Read the workspace version
+      id: read_version
+      shell: bash
+      env:
+        MANIFEST_PATH: ${{ inputs.manifest-path }}
+      run: |
+        version="$(python3 - <<'PY'
+        import os
+        import tomllib
+
+        with open(os.environ["MANIFEST_PATH"], "rb") as manifest:
+            document = tomllib.load(manifest)
+        print(document["workspace"]["package"]["version"])
+        PY
+        )"
+        echo "Version in ${MANIFEST_PATH}: ${version}"
+        echo "version=${version}" >> "$GITHUB_OUTPUT"

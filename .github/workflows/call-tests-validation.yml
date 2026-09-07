@@ -1,0 +1,20 @@
+name: "tests-validation"
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  tests_validation:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+      # Includes the parity suites: packet bytes and text rendering against the reference
+      # dumps, and the packet id tables against minecraft-data.
+      - name: Run tests
+        run: cargo test --workspace --locked

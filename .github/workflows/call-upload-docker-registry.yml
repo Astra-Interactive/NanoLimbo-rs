@@ -1,0 +1,165 @@
+name: "upload-docker-registry"
+on:
+  workflow_call:
+
+# `packages: write` is required to push to GitHub Container Registry with the default
+# GITHUB_TOKEN. The caller job must grant the same permission.
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # One runner per architecture rather than one runner emulating the other: the release
+  # profile builds with fat LTO and a single codegen unit, which under QEMU turns a few
+  # minutes into the better part of an hour. Each job pushes an unnamed image and reports
+  # its digest; the job below binds those digests together under the actual tags.
+  build_image:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            platform_key: linux-amd64
+            runner: ubuntu-latest
+          - platform: linux/arm64
+            platform_key: linux-arm64
+            # Free for public repositories. Swap in `ubuntu-latest` plus
+            # docker/setup-qemu-action if this repository is ever made private.
+            runner: ubuntu-24.04-arm
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # GHCR rejects an uppercase path, and github.repository keeps the owner's casing.
+      - name: Resolve the image name
+        id: image
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: echo "name=${REGISTRY}/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Read project version
+        id: version
+        uses: ./.github/actions/read-version
+        with:
+          manifest-path: './Cargo.toml'
+
+      # Only the labels are used here - a digest has no tags - but the version is fed in
+      # so that org.opencontainers.image.version records the release rather than the
+      # branch name this happened to be built from.
+      - name: Read labels from the repository
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+
+      - name: Log in to ${{ env.REGISTRY }}
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ steps.image.outputs.name }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=${{ matrix.platform_key }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.platform_key }}
+
+      # The digest travels as an empty file named after itself; only the name is needed.
+      - name: Export the digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          mkdir -p /tmp/digests
+          touch "/tmp/digests/${DIGEST#sha256:}"
+
+      - name: Upload the digest
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: digest-${{ matrix.platform_key }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  upload_docker_registry:
+    name: Publish the multi-platform tags
+    runs-on: ubuntu-latest
+    needs: [ build_image ]
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Resolve the image name
+        id: image
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: echo "name=${REGISTRY}/${REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Read project version
+        id: version
+        uses: ./.github/actions/read-version
+        with:
+          manifest-path: './Cargo.toml'
+
+      - name: Download the digests
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: /tmp/digests
+          pattern: digest-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      # `latest` moves because a push to the default branch is a release: the version
+      # check on the pull request guarantees it is a version nothing has published yet.
+      - name: Compose the tags
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ steps.image.outputs.name }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=latest
+
+      - name: Log in to ${{ env.REGISTRY }}
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      # Both digests under one manifest list, so `docker pull` on either architecture
+      # resolves to the image built natively for it.
+      - name: Create the manifest list and push it
+        working-directory: /tmp/digests
+        env:
+          IMAGE_NAME: ${{ steps.image.outputs.name }}
+        run: |
+          # Both substitutions are meant to split into separate arguments: one tag flag
+          # per tag, one image reference per digest file.
+          # shellcheck disable=SC2046
+          docker buildx imagetools create \
+            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf "${IMAGE_NAME}@sha256:%s " *)
+
+      - name: Inspect the published image
+        env:
+          IMAGE_NAME: ${{ steps.image.outputs.name }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: docker buildx imagetools inspect "${IMAGE_NAME}:${VERSION}"

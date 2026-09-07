@@ -1,0 +1,43 @@
+name: "version-changed"
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  version_changed:
+    name: Validate version is changed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Checkout base branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.base_ref }}
+          path: base
+      - name: Read current version
+        id: current
+        uses: ./.github/actions/read-version
+        with:
+          manifest-path: './Cargo.toml'
+      - name: Read base version
+        id: base
+        uses: ./.github/actions/read-version
+        with:
+          manifest-path: './base/Cargo.toml'
+      # A merge to the default branch tags a release and publishes an image under this
+      # version, and neither can be taken back. Requiring the bump in the pull request is
+      # what keeps the release workflow from ever pushing over what it published last.
+      - name: Check workspace.package.version is changed
+        env:
+          BASE_VERSION: ${{ steps.base.outputs.version }}
+          CURRENT_VERSION: ${{ steps.current.outputs.version }}
+        run: |
+          echo "Base version: ${BASE_VERSION}"
+          echo "Current version: ${CURRENT_VERSION}"
+          if [ -z "${CURRENT_VERSION}" ] || [ "${CURRENT_VERSION}" = "${BASE_VERSION}" ]; then
+            echo "::error file=Cargo.toml::workspace.package.version is not changed (still ${CURRENT_VERSION}). Bump the version before merging."
+            exit 1
+          fi

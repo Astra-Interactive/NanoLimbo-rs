@@ -1,0 +1,20 @@
+name: "clippy-validation"
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  clippy_validation:
+    name: Validate project with clippy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Git repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Rust
+        uses: ./.github/actions/setup-rust
+      # --all-targets so tests, benches and examples are linted too: the workspace lints
+      # in Cargo.toml deny unwrap and panic, and test code is where those creep back in.
+      - name: Run clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings

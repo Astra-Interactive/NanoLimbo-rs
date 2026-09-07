@@ -1,0 +1,50 @@
+name: Release Main
+on:
+  push:
+    branches:
+      - main
+
+# Explicit least-privilege token permissions so the workflow behaves
+# the same in personal repositories and organizations regardless of
+# the default GITHUB_TOKEN settings. Jobs that need more (e.g. creating
+# a release, pushing a package) elevate their permissions individually.
+permissions:
+  contents: read
+
+# Not cancelled in progress, unlike the pull request check: an interrupted run can leave
+# architecture images pushed with no manifest list naming them.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref_name }}-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  lockfile_validation:
+    name: Validate Cargo.lock
+    uses: ./.github/workflows/call-lockfile-validation.yml
+  # The pull request already ran these, but a push to the default branch need not have
+  # come through one, and a tag and a public image tag cannot be withdrawn once pushed.
+  clippy_validation:
+    name: Validate with clippy
+    needs: lockfile_validation
+    uses: ./.github/workflows/call-clippy-validation.yml
+  tests_validation:
+    name: Run tests
+    needs: lockfile_validation
+    uses: ./.github/workflows/call-tests-validation.yml
+  upload_docker_registry:
+    name: Publish container image
+    needs: [ clippy_validation, tests_validation ]
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/call-upload-docker-registry.yml
+  # Last, and only if the image is up: the tag is what tells people a release happened,
+  # so it should not exist for a version nobody can pull.
+  upload_github_release:
+    name: Upload GitHub release
+    needs: [ upload_docker_registry ]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/call-upload-github-release.yml
+    secrets:
+      ACTIONS_TOKEN: ${{ secrets.ACTIONS_TOKEN }}

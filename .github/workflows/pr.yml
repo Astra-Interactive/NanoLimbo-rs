@@ -1,0 +1,56 @@
+name: Pull Request Check
+on:
+  pull_request:
+    branches:
+      - 'main'
+
+# Explicit least-privilege token permissions so the workflow behaves
+# the same in personal repositories and organizations regardless of
+# the default GITHUB_TOKEN settings.
+permissions:
+  contents: read
+
+# Concurrency strategy:
+#   github.workflow: distinguish this workflow from others
+#   github.event_name: distinguish `push` event from `pull_request` event
+#   github.ref_name: distinguish branch
+#   github.repository: distinguish owner+repository
+#
+# Reference:
+#   https://docs.github.com/en/actions/using-jobs/using-concurrency
+#   https://docs.github.com/en/actions/learn-github-actions/contexts#github-context
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref_name }}-${{ github.repository }}
+  cancel-in-progress: true
+
+jobs:
+  lockfile_validation:
+    name: Validate Cargo.lock
+    uses: ./.github/workflows/call-lockfile-validation.yml
+  version_changed:
+    name: Validate version is changed
+    needs: lockfile_validation
+    uses: ./.github/workflows/call-version-changed.yml
+  format_validation:
+    name: Validate formatting
+    needs: lockfile_validation
+    uses: ./.github/workflows/call-format-validation.yml
+  clippy_validation:
+    name: Validate with clippy
+    needs: lockfile_validation
+    uses: ./.github/workflows/call-clippy-validation.yml
+  tests_validation:
+    name: Run tests
+    needs: lockfile_validation
+    uses: ./.github/workflows/call-tests-validation.yml
+  build_project:
+    name: Build project
+    needs: [ lockfile_validation, clippy_validation, tests_validation ]
+    uses: ./.github/workflows/call-build-project.yml
+  # Alongside build_project rather than after it: that one builds for glibc on the host,
+  # this one builds the statically linked musl binary the image actually ships, and a
+  # break in either is worth hearing about without waiting for the other.
+  docker_image_validation:
+    name: Validate container image
+    needs: [ lockfile_validation, clippy_validation, tests_validation ]
+    uses: ./.github/workflows/call-docker-image-validation.yml
