@@ -1,0 +1,18 @@
+[package]
+name = "limbo-server"
+description = "Connection lifecycle: decoding client packets and deciding what the server does next."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+bytes.workspace = true
+limbo-protocol = { path = "../limbo-protocol" }
+limbo-text = { path = "../limbo-text" }
+thiserror.workspace = true
+uuid.workspace = true
+
+[lints]
+workspace = true
