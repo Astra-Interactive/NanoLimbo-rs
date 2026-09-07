@@ -1,0 +1,29 @@
+{
+  "description": "UUID.nameUUIDFromBytes(\"OfflinePlayer:\" + name), the offline-mode identity.",
+  "entries": [
+    {
+      "username": "NanoLimbo",
+      "uuid": "29c66bf5-7218-3158-9983-b554b1169e82"
+    },
+    {
+      "username": "Notch",
+      "uuid": "b50ad385-829d-3141-a216-7e7d7539ba7f"
+    },
+    {
+      "username": "a",
+      "uuid": "52428a0e-1e30-3cb1-976c-e728b2614047"
+    },
+    {
+      "username": "0123456789abcdef",
+      "uuid": "543aeb80-2772-36a8-be63-9a650fb23c64"
+    },
+    {
+      "username": "äöü",
+      "uuid": "59612492-a340-3737-ad3f-34f96e70a5f0"
+    },
+    {
+      "username": "𝄞",
+      "uuid": "103b9ea2-b886-35a8-8e22-d4a89a730396"
+    }
+  ]
+}
