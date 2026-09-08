@@ -1,0 +1,16 @@
+# The control: the plain binary, no JVM and no wrapper. It answers the one question the other
+# three cannot - whether a failure belongs to the server or to the way it is embedded.
+
+bind:
+  # Empty rather than loopback: this one is published to the host and reached directly.
+  ip: ""
+  port: 25565
+
+maxPlayers: 100
+dimension: THE_END
+
+infoForwarding:
+  type: NONE
+
+# 3 so the log carries the per-connection lines, not only the lifecycle ones.
+debugLevel: 3

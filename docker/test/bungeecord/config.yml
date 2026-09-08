@@ -1,0 +1,42 @@
+# BungeeCord rewrites this file on startup and fills in every key it does not find, so only
+# what this harness depends on is written down.
+
+listeners:
+- host: 0.0.0.0:25565
+  max_players: 100
+  motd: '&bNanoLimbo-rs inside BungeeCord'
+  priorities:
+  - limbo
+  force_default_server: true
+  query_enabled: false
+  ping_passthrough: false
+  proxy_protocol: false
+  forced_hosts: {}
+
+servers:
+  limbo:
+    # Not published from the container: the limbo in this JVM is reachable only through the
+    # proxy.
+    address: 127.0.0.1:30066
+    motd: 'NanoLimbo-rs'
+    restricted: false
+
+ip_forward: true
+
+# No Mojang session server in a test, and the bench logs in under names that own no account.
+online_mode: false
+
+# The bench logs a crowd in from one address, which is what this throttle exists to stop.
+# Keep it at its default in a real deployment.
+connection_throttle: -1
+
+# limbo-bench speaks the protocol uncompressed, and so does the limbo it is pointed at. A
+# proxy compressing the link in between leaves the bench reading a frame it cannot parse,
+# which looks like a refused login rather than the missing feature it is.
+network_compression_threshold: -1
+
+timeout: 30000
+player_limit: -1
+log_pings: false
+prevent_proxy_connections: false
+forge_support: false

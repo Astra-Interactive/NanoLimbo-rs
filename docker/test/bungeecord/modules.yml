@@ -1,0 +1,4 @@
+# BungeeCord otherwise downloads its bundled command modules from its own CI on first start.
+# None of them bears on whether a plugin can run a limbo, and an empty list keeps the harness
+# from needing the network at runtime as well as at build time.
+modules: []

@@ -1,0 +1,18 @@
+# The limbo running inside the BungeeCord JVM. See
+# ../../../../../crates/limbo-config/resources/settings.yml for the commented original.
+
+bind:
+  # Loopback, and this port is not published: only the proxy in this container reaches it.
+  ip: "127.0.0.1"
+  port: 30066
+
+maxPlayers: 100
+dimension: THE_END
+
+infoForwarding:
+  # BungeeCord's scheme carries the player's address and identity in the handshake and has no
+  # shared secret, so a backend using it must be unreachable from anywhere but the proxy.
+  type: LEGACY
+
+# 3 so the log carries the per-connection lines, not only the lifecycle ones.
+debugLevel: 3

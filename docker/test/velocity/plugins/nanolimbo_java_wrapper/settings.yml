@@ -1,0 +1,20 @@
+# The limbo running inside the Velocity JVM. See
+# ../../../../../crates/limbo-config/resources/settings.yml for the commented original.
+
+bind:
+  # Loopback, and this port is not published: only the proxy in this container reaches it.
+  ip: "127.0.0.1"
+  port: 30066
+
+maxPlayers: 100
+dimension: THE_END
+
+infoForwarding:
+  type: MODERN
+  # The '@' prefix reads the secret from a file, and this path walks out of the plugin data
+  # directory to the one Velocity itself reads. One file rather than two copies, so the two
+  # ends of the handover cannot drift apart.
+  secret: "@../../forwarding.secret"
+
+# 3 so the log carries the per-connection lines, not only the lifecycle ones.
+debugLevel: 3

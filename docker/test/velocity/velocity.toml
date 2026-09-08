@@ -1,0 +1,37 @@
+# Only what this harness depends on is written down; Velocity fills in the rest of its
+# defaults on first start.
+
+config-version = "2.8"
+
+bind = "0.0.0.0:25565"
+motd = "<#09add3>NanoLimbo-rs inside Velocity"
+show-max-players = 100
+
+# No Mojang session server in a test, and the bench logs in under names that own no account.
+online-mode = false
+force-key-authentication = false
+
+# The secret file below is also what plugins/nanolimbo_java_wrapper/settings.yml reads, since
+# modern forwarding fails closed if the two ends disagree.
+player-info-forwarding-mode = "MODERN"
+forwarding-secret-file = "forwarding.secret"
+
+[servers]
+# Not published from the container: the limbo in this JVM is reachable only through the proxy.
+limbo = "127.0.0.1:30066"
+try = ["limbo"]
+
+[forced-hosts]
+# Empty on purpose, and it has to be spelt out: Velocity fills a missing section from its
+# shipped default, which names three servers this file does not declare, and then refuses to
+# start.
+
+[advanced]
+# The bench logs a crowd in from one address, which is what this limiter exists to stop. Keep
+# it at its default in a real deployment.
+login-ratelimit = 0
+
+# limbo-bench speaks the protocol uncompressed, and so does the limbo it is pointed at. A
+# proxy compressing the link in between leaves the bench reading a frame it cannot parse,
+# which looks like a refused login rather than the missing feature it is.
+compression-threshold = -1

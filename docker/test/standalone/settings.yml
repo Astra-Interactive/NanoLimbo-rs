@@ -1,0 +1,17 @@
+# The limbo the wrapper jar runs with no proxy around it, which isolates the jar and its
+# cdylib from anything a proxy does.
+
+bind:
+  # Empty rather than loopback: this one is published to the host and reached directly.
+  ip: ""
+  port: 25565
+
+maxPlayers: 100
+dimension: THE_END
+
+infoForwarding:
+  # Nothing in front of it to trust.
+  type: NONE
+
+# 3 so the log carries the per-connection lines, not only the lifecycle ones.
+debugLevel: 3
