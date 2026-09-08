@@ -1,46 +1,23 @@
-# Proves the Java wrapper runs the limbo inside a real proxy process.
+# velocity 25577   bungeecord 25578   standalone 25579   native 25580
 #
-#   docker compose up                  build, start the four servers, log players into all of them
-#   PLAYERS=200 docker compose up      the same with a heavier bench
-#   docker compose down                stop and clean up
-#
-# velocity and bungeecord each load our jar from their plugins directory and reach the limbo
-# it starts on the container's loopback; that backend port is deliberately not published, so
-# a player can only get to it through the proxy. standalone and native are the controls: if
-# native fails the server is broken, if only standalone fails the jar is, and if only a proxy
-# service fails the proxy integration is.
-#
-#   velocity 25577   bungeecord 25578   standalone 25579   native 25580
-#
-# bench waits for all four and then logs players into every one of them, exiting non-zero if
-# any of them fails to let a player in. That is the assertion; the proxy health checks only
-# get the ordering right, since a server list ping is answered by the proxy itself and says
-# nothing about whether the limbo behind it is reachable.
-#
-# Velocity logs "Connection reset by peer" once per bench player. limbo-bench holds its
-# sockets open to measure what the server is carrying and then exits without disconnecting
-# politely, so every proxy says the same about it.
+# bench waits for all four, logs players into each, and exits non-zero if any refuses one.
 
 name: nanolimbo-proxy-test
 
-# One image for everything, so the jar, the binary and the bench cannot differ between the
-# services being compared. Only velocity declares how to build it: five services naming the
-# same tag would build it five times at once and race each other to write it.
+# Only velocity declares the build: five services naming one tag would race to write it.
 x-harness: &harness
   image: nanolimbo-test:local
   restart: "no"
 
-# Only timings, so the test stays the /usr/bin/health.sh the image ships - a server list
-# ping, which the proxy answers itself. Its ten-second start period is written for a warm
-# image; a first run has 40 MB of proxy to fetch before anything listens.
+# The ping check the image ships. The long start period is for a first run, which has a proxy
+# to fetch before anything listens.
 x-proxy-health: &proxy-health
   start_period: 180s
   interval: 5s
   retries: 40
 
-# The image's check cannot be used on a bare limbo: mc-monitor pings with protocol -1, and
-# the limbo answers "Unsupported client version" to a version it does not know. A completed
-# login is a stronger statement anyway, and limbo-bench speaks a version the server knows.
+# Not the image's check: mc-monitor pings with protocol -1, and the limbo answers a version it
+# does not know with "Unsupported client version".
 x-limbo-health: &limbo-health
   test: ["CMD", "limbo-bench", "--players", "1", "--settle-seconds", "0", "health=127.0.0.1:25565"]
   start_period: 60s
@@ -55,26 +32,22 @@ services:
       dockerfile: docker/test/Dockerfile
     environment:
       TYPE: VELOCITY
-      # Pinned so a rerun measures the same build rather than whatever is newest.
+      # Pinned so a rerun measures the same build.
       VELOCITY_VERSION: "4.1.1"
       VELOCITY_BUILD_ID: "24"
-      # health.sh reads the port out of velocity.toml, but only if it can parse it; saying it
-      # outright keeps the check pointed at the port this configuration actually binds.
       SERVER_PORT: "25565"
-      # The configuration below is complete, and fetching the upstream defaults over it would
-      # make a run depend on a third-party repository staying up.
+      # The configuration below is complete, and fetching upstream defaults over it would make
+      # a run depend on a third-party repository staying up.
       SKIP_DOWNLOAD_DEFAULTS: "true"
     volumes:
-      # Mounted file by file rather than as a directory: /config already carries the wrapper
-      # jar from the image, and a directory mount would hide it.
+      # File by file: a directory mount on /config would hide the jar the image carries there.
       - ./velocity/velocity.toml:/config/velocity.toml:ro
       - ./velocity/forwarding.secret:/config/forwarding.secret:ro
       - ./velocity/plugins/nanolimbo_java_wrapper/settings.yml:/config/plugins/nanolimbo_java_wrapper/settings.yml:ro
     ports:
       - "25577:25565"
     healthcheck: *proxy-health
-    # The wrapper asks the limbo to stop from the proxy's shutdown handler and waits up to
-    # ten seconds for it, so a shorter grace period kills the JVM mid-shutdown.
+    # The wrapper waits up to ten seconds for the limbo to stop.
     stop_grace_period: 30s
 
   bungeecord:
@@ -93,8 +66,6 @@ services:
     healthcheck: *proxy-health
     stop_grace_period: 30s
 
-  # The same jar the proxies load, through its own main class. The configuration directory is
-  # an argument here, where a proxy plugin would be handed its data directory.
   standalone:
     <<: *harness
     entrypoint: ["java", "-jar", "/config/plugins/nanolimbo_java_wrapper.jar", "/config"]
@@ -105,8 +76,6 @@ services:
     healthcheck: *limbo-health
     stop_grace_period: 30s
 
-  # No JVM and no wrapper. It reads settings.yml from its working directory, so there is
-  # nothing to pass it.
   native:
     <<: *harness
     entrypoint: ["nanolimbo"]
@@ -119,9 +88,7 @@ services:
 
   bench:
     <<: *harness
-    # The addresses are resolved here because limbo-bench takes an address rather than a
-    # hostname - it has to be able to point at a server no DNS knows about - while compose
-    # only promises service names.
+    # limbo-bench takes an address, not a hostname; compose only promises service names.
     entrypoint:
       - sh
       - -ec
@@ -133,7 +100,6 @@ services:
         exec limbo-bench --players "$$PLAYERS" --settle-seconds 1 --wait-seconds 120 $$targets
     environment:
       PLAYERS: "${PLAYERS:-5}"
-    # A one-shot client has nothing to answer a ping with.
     healthcheck:
       disable: true
     depends_on:
