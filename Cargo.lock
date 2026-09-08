@@ -242,7 +242,7 @@ checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
 
 [[package]]
 name = "limbo-bench"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "limbo-protocol",
  "thiserror",
@@ -251,7 +251,7 @@ dependencies = [
 
 [[package]]
 name = "limbo-config"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "limbo-text",
  "limbo-world",
@@ -262,7 +262,7 @@ dependencies = [
 
 [[package]]
 name = "limbo-ffi"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "nanolimbo",
  "tokio",
@@ -271,7 +271,7 @@ dependencies = [
 
 [[package]]
 name = "limbo-net"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bytes",
  "hmac",
@@ -287,7 +287,7 @@ dependencies = [
 
 [[package]]
 name = "limbo-packet"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bytes",
  "limbo-protocol",
@@ -302,7 +302,7 @@ dependencies = [
 
 [[package]]
 name = "limbo-protocol"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bytes",
  "serde_json",
@@ -313,7 +313,7 @@ dependencies = [
 
 [[package]]
 name = "limbo-server"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bytes",
  "limbo-protocol",
@@ -324,7 +324,7 @@ dependencies = [
 
 [[package]]
 name = "limbo-text"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bytes",
  "limbo-protocol",
@@ -335,7 +335,7 @@ dependencies = [
 
 [[package]]
 name = "limbo-world"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bytes",
  "flate2",
@@ -398,7 +398,7 @@ dependencies = [
 
 [[package]]
 name = "nanolimbo"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "bytes",
  "futures-util",
