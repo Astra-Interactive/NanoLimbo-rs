@@ -76,10 +76,10 @@ docker run -d --name nanolimbo -p 25565:25565 \
 Debian, and the panel installs the matching release build and keeps `settings.yml`
 pointed at the allocation it gave you.
 
-**Inside a proxy** — [`nanolimbo_java_wrapper.jar`](https://github.com/Astra-Interactive/NanoLimbo-rs/releases/latest)
+**Inside a proxy** — [`NanoLimbo-rs-Wrapper-<version>.jar`](https://github.com/Astra-Interactive/NanoLimbo-rs/releases/latest)
 runs the server in your Velocity or BungeeCord process, no second service to supervise.
 Drop it in `plugins/`; its configuration appears in `plugins/nanolimbo_java_wrapper/settings.yml`.
-The same jar runs standalone with `java -jar nanolimbo_java_wrapper.jar [directory]`,
+The same jar runs standalone with `java -jar NanoLimbo-rs-Wrapper-<version>.jar [directory]`,
 and carries native builds for Linux, macOS and Windows on x86-64 and ARM64.
 
 **From source** — needs Rust 1.93:

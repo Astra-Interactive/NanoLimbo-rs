@@ -73,11 +73,11 @@ jobs:
           chmod +x gradlew
           ./gradlew build
 
-      # Named to match the archives so the release job can collect everything it
-      # publishes with one pattern.
+      # The artifact name matches the archives so one pattern collects the whole release.
+      # The file inside it carries the version, which the release assets are named for.
       - name: Upload the wrapper jar
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: nanolimbo_java_wrapper
-          path: java-wrapper/wrapper/build/libs/nanolimbo_java_wrapper.jar
+          path: java-wrapper/wrapper/build/libs/NanoLimbo-rs-Wrapper-*.jar
           if-no-files-found: error

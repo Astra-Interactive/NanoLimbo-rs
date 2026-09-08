@@ -33,8 +33,9 @@ RUN chmod +x gradlew && ./gradlew --no-daemon build
 FROM itzg/bungeecord:java25 AS runtime
 
 # /config is synced into /server on startup. The image's own /plugins is copied rather than
-# synced, and nests a second plugins directory on a reused volume.
-COPY --from=jar-build /src/java-wrapper/wrapper/build/libs/nanolimbo_java_wrapper.jar /config/plugins/nanolimbo_java_wrapper.jar
+# synced, and nests a second plugins directory on a reused volume. Renamed without its version
+# so the compose entrypoint does not have to know it.
+COPY --from=jar-build /src/java-wrapper/wrapper/build/libs/NanoLimbo-rs-Wrapper-*.jar /config/plugins/nanolimbo_java_wrapper.jar
 
 COPY --from=rust-build /src/target/release/nanolimbo /usr/local/bin/nanolimbo
 COPY --from=rust-build /src/target/release/limbo-bench /usr/local/bin/limbo-bench

@@ -73,7 +73,7 @@ tasks.named<ProcessResources>("processResources").configure {
 // A plain fat jar rather than a shaded one: the single runtime dependency is JNA, and relocating
 // it would break the native stub `Native` looks up by its own package name.
 tasks.jar {
-    archiveFileName = "nanolimbo_java_wrapper.jar"
+    archiveFileName = "NanoLimbo-rs-Wrapper-$version.jar"
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
 
