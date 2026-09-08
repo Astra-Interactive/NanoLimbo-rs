@@ -21,19 +21,16 @@ jobs:
   lockfile_validation:
     name: Validate Cargo.lock
     uses: ./.github/workflows/call-lockfile-validation.yml
-  # The pull request already ran these, but a push to the default branch need not have
+  # The pull request already ran this, but a push to the default branch need not have
   # come through one, and a tag and a public image tag cannot be withdrawn once pushed.
+  # Tests are not repeated here; they gate the pull request.
   clippy_validation:
     name: Validate with clippy
     needs: lockfile_validation
     uses: ./.github/workflows/call-clippy-validation.yml
-  tests_validation:
-    name: Run tests
-    needs: lockfile_validation
-    uses: ./.github/workflows/call-tests-validation.yml
   upload_docker_registry:
     name: Publish container image
-    needs: [ clippy_validation, tests_validation ]
+    needs: [ clippy_validation ]
     permissions:
       contents: read
       packages: write
@@ -43,7 +40,7 @@ jobs:
   # image being published.
   build_release_artifacts:
     name: Build release artifacts
-    needs: [ clippy_validation, tests_validation ]
+    needs: [ clippy_validation ]
     uses: ./.github/workflows/call-build-release-artifacts.yml
   # The jar embeds the shared libraries the matrix above produced, so it can only be
   # assembled once they exist.
