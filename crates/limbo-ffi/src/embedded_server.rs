@@ -7,21 +7,15 @@ use nanolimbo::startup_error::StartupError;
 use crate::cancellation_token::CancellationToken;
 use crate::start_status::StartStatus;
 
-/// Runs a server in the calling thread until `token` is cancelled.
+/// Blocks the calling thread until `token` is cancelled.
 ///
-/// This is the whole of what the C ABI does, kept safe and separate so that it can be
-/// tested without going through a raw pointer.
-///
-/// `configuration_directory` is where `settings.yml` is read from, and written to on a
-/// first run. A host must pass its own directory rather than relying on the working
-/// directory: an embedded server shares that directory with the host, and the host is
-/// rarely standing in the place the operator expects the configuration to appear.
+/// The directory is passed rather than taken from the process, whose working directory
+/// belongs to the host.
 pub fn run(token: &CancellationToken, configuration_directory: &Path) -> StartStatus {
     let prepared = match prepare(configuration_directory) {
         Ok(prepared) => prepared,
         Err(error) => {
-            // No subscriber is installed yet - the configuration is what decides the log
-            // level, and it is the thing that just failed to load.
+            // The configuration decides the log level, so there is no subscriber yet.
             eprintln!("Cannot start server: {error}");
             return StartStatus::StartupFailed;
         }
@@ -69,7 +63,6 @@ mod tests {
 
     use super::*;
 
-    /// A directory of our own, so a test never reads or writes another test's settings.
     fn scratch_directory(name: &str) -> std::path::PathBuf {
         let root = std::env::temp_dir().join(format!(
             "nanolimbo-ffi-{}-{name}-{:?}",
@@ -91,8 +84,6 @@ mod tests {
         assert_eq!(status, StartStatus::StartupFailed);
     }
 
-    /// The point of the whole token: a host that says stop is obeyed, and `run` returns
-    /// rather than blocking its caller forever.
     #[test]
     fn given_a_running_server_when_the_host_cancels_the_token_then_it_stops_and_reports_ok() {
         let root = scratch_directory("cancels");
@@ -106,8 +97,6 @@ mod tests {
         let stopper = Arc::clone(&token);
         let server = std::thread::spawn(move || run(&token, &root));
 
-        // The server has to reach its wait before the stop means anything on a slow
-        // machine; the token stores the request either way, so this only bounds the test.
         std::thread::sleep(Duration::from_millis(200));
         stopper.cancel();
 

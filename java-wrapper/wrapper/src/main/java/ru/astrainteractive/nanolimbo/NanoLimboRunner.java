@@ -11,12 +11,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * One run of the NanoLimbo-rs server: {@link #run()} blocks for as long as the server lives, and
- * {@link #stop()} ends it from another thread.
- *
- * <p>The token is native memory shared between those two threads, so every access to it happens
- * under one lock. Without that, a {@link #stop()} arriving either before {@link #run()} has
- * acquired the token or after {@code run} has freed it would dereference a stale pointer.
+ * {@link #run()} blocks for as long as the server lives and {@link #stop()} ends it from another
+ * thread. Both reach the same native token, so a stop arriving before {@code run} acquired it, or
+ * after it freed it, would dereference a stale pointer - hence the lock on every access.
  */
 public final class NanoLimboRunner implements Runnable {
 
@@ -28,15 +25,10 @@ public final class NanoLimboRunner implements Runnable {
     private final Object lifecycle = new Object();
     private final CountDownLatch terminated = new CountDownLatch(1);
 
-    /**
-     * Non-null only between acquiring the token and freeing it. Guarded by {@link #lifecycle}.
-     */
+    /** Guarded by {@link #lifecycle}; non-null only between acquiring and freeing. */
     private Pointer token;
 
-    /**
-     * Set by a {@link #stop()} that arrived before the server was started. Guarded by
-     * {@link #lifecycle}.
-     */
+    /** Guarded by {@link #lifecycle}; keeps a stop that arrived before the start from being lost. */
     private boolean stopRequested;
 
     public NanoLimboRunner(NativeLibrary library, Path configurationDirectory, Logger logger) {
@@ -46,12 +38,8 @@ public final class NanoLimboRunner implements Runnable {
     }
 
     /**
-     * Copies the path into native memory as a NUL-terminated UTF-8 string.
-     *
-     * <p>Declaring the parameter as a Java {@code String} would leave the encoding to JNA's
-     * {@code jna.encoding} system property, and setting that inside a proxy JVM would change how
-     * every other plugin marshals its strings. Off-heap memory also keeps a Java array from being
-     * pinned for the lifetime of the server, which is how long {@code start_app} blocks.
+     * A Java {@code String} would leave the encoding to JNA's {@code jna.encoding} property, and
+     * setting that inside a proxy JVM changes how every other plugin marshals its strings.
      */
     private static Memory encodeUtf8(String value) {
         byte[] encoded = value.getBytes(StandardCharsets.UTF_8);
@@ -62,7 +50,7 @@ public final class NanoLimboRunner implements Runnable {
     }
 
     /**
-     * @return the token to run with, or {@code null} when the server must not start.
+     * @return {@code null} when the server must not start, having been stopped already
      */
     private Pointer acquireToken() {
         synchronized (lifecycle) {
@@ -124,10 +112,8 @@ public final class NanoLimboRunner implements Runnable {
     }
 
     /**
-     * Asks the server to stop and waits for {@link #run()} to return, so that a proxy shutting down
-     * does not race the server's own teardown.
-     *
-     * <p>Safe to call before {@code run}, after it, and more than once.
+     * Waits for {@link #run()} to return, so a proxy shutting down does not race the teardown.
+     * Safe before {@code run}, after it, and more than once.
      */
     public void stop() {
         boolean cancelled;

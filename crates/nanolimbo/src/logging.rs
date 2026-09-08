@@ -15,15 +15,11 @@ pub fn level_from_debug_setting(debug_level: i32) -> Level {
     }
 }
 
-/// Installs the log subscriber, unless the process already has one.
-///
 /// `RUST_LOG` wins when set, so an operator can turn on detail for one module without
 /// editing the configuration file.
 ///
-/// Installing is allowed to fail. A subscriber is global to the process, and when the
-/// server is embedded in a host that already installed one — or is started a second time
-/// after a plugin reload — the existing subscriber is the right one to keep. Failing hard
-/// there would abort the host, which is a steep price for a logging setting.
+/// A subscriber is global, so an embedded server may find the host already installed one.
+/// Keeping it beats aborting the host over a logging setting.
 pub fn install(debug_level: i32) {
     let level = level_from_debug_setting(debug_level);
     let filter = EnvFilter::try_from_default_env()

@@ -6,12 +6,6 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Runs NanoLimbo-rs without a proxy around it, for a jar started with {@code java -jar}.
- *
- * <p>The composition root of that mode: it is the only place here that loads the cdylib and builds
- * the runner.
- */
 public final class Standalone {
 
     private static final Logger LOGGER = Logger.getLogger(Standalone.class.getName());
@@ -21,7 +15,7 @@ public final class Standalone {
     }
 
     /**
-     * @param arguments the configuration directory, or nothing for the working directory.
+     * @param arguments the configuration directory, or nothing for the working directory
      */
     public static void main(String[] arguments) {
         Path configurationDirectory = Path.of(arguments.length > 0 ? arguments[0] : ".");

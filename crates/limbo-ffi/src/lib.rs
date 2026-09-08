@@ -1,25 +1,9 @@
-//! A C ABI for running the limbo server inside a host process.
-//!
-//! The Java wrapper loads this library and drives it through the four functions below.
-//! Running in the host's own process rather than as a child of it is what lets a proxy
-//! start a limbo without a second executable to ship, supervise and reap.
-//!
-//! Everything here is a thin shell over [`embedded_server::run`]. Raw pointers are
-//! checked and converted at once, and no logic lives in an `unsafe` function, so the
-//! behaviour is tested through the safe types instead.
-//!
-//! The contract, as C:
-//!
 //! ```c
 //! CancellationToken* get_cancellation_token(void);
 //! int32_t            start_app(CancellationToken* ptr, const char* config_dir);
 //! void               stop_app(CancellationToken* ptr);
 //! void               cleanup_token(CancellationToken* ptr);
 //! ```
-//!
-//! `start_app` blocks for the lifetime of the server and returns a [`StartStatus`] code.
-//! `stop_app` is expected on another thread. The host owns the token and must free it
-//! with `cleanup_token` exactly once, after `start_app` has returned.
 
 use std::ffi::{CStr, c_char};
 use std::path::Path;
@@ -34,25 +18,17 @@ pub mod start_status;
 use crate::cancellation_token::CancellationToken;
 use crate::start_status::StartStatus;
 
-/// Creates a token the host can later use to stop the server.
-///
-/// Returns null only if the allocation itself fails. The host must pass the result to
-/// `cleanup_token` once it is done with it.
 #[unsafe(no_mangle)]
 pub extern "C" fn get_cancellation_token() -> *mut CancellationToken {
     Box::into_raw(Box::new(CancellationToken::new(Arc::new(Notify::new()))))
 }
 
-/// Runs the server until the token is cancelled, blocking the calling thread.
-///
-/// Returns a [`StartStatus`] code: `0` on a clean shutdown, non-zero on failure.
+/// Blocks the calling thread until the token is cancelled.
 ///
 /// # Safety
 ///
-/// `token` must be a pointer returned by `get_cancellation_token` that has not yet been
-/// passed to `cleanup_token`, and `configuration_directory` must be a null-terminated C
-/// string that stays valid for the duration of this call. Both may be null, which is
-/// reported rather than dereferenced.
+/// Pointers must come from `get_cancellation_token` and a null-terminated C string that
+/// outlives the call. Null is reported, not dereferenced.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn start_app(
     token: *mut CancellationToken,
@@ -72,13 +48,11 @@ pub unsafe extern "C" fn start_app(
     embedded_server::run(token, Path::new(directory)).code()
 }
 
-/// Asks a running server to stop. Safe to call before it has finished starting, and safe
-/// to call more than once.
+/// Safe before the server has started, and more than once.
 ///
 /// # Safety
 ///
-/// `token` must be a pointer returned by `get_cancellation_token` that has not yet been
-/// passed to `cleanup_token`. Null is ignored.
+/// `token` must not have been passed to `cleanup_token`. Null is ignored.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn stop_app(token: *mut CancellationToken) {
     if let Some(token) = unsafe { token.as_ref() } {
@@ -86,13 +60,9 @@ pub unsafe extern "C" fn stop_app(token: *mut CancellationToken) {
     }
 }
 
-/// Releases a token.
-///
 /// # Safety
 ///
-/// `token` must be a pointer returned by `get_cancellation_token`, and must not be used
-/// again afterwards - including by a `stop_app` still in flight on another thread. Null
-/// is ignored, and no pointer may be passed here twice.
+/// Never twice, and never while a `stop_app` is still in flight on another thread.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn cleanup_token(token: *mut CancellationToken) {
     if token.is_null() {
@@ -105,8 +75,6 @@ pub unsafe extern "C" fn cleanup_token(token: *mut CancellationToken) {
 mod tests {
     use super::*;
 
-    /// A host that mismanages its pointers gets a code back, not a crash. This is the
-    /// one thing the safe layer underneath cannot be made to prove.
     #[test]
     fn given_a_null_token_when_the_server_is_started_then_it_reports_rather_than_crashes() {
         let directory = c"/tmp";

@@ -3,11 +3,8 @@ use std::sync::Arc;
 use nanolimbo::shutdown_source::ShutdownSource;
 use tokio::sync::Notify;
 
-/// The handle a host keeps so that it can stop a server it started.
-///
-/// `start_app` blocks for the lifetime of the server, so the stop request always arrives
-/// on a different thread than the one running it. Everything here is therefore shared
-/// rather than owned, and the type is `Sync`.
+/// `start_app` blocks for the server's lifetime, so a stop always arrives on another
+/// thread. Hence shared, not owned.
 pub struct CancellationToken {
     notify: Arc<Notify>,
 }
@@ -17,15 +14,11 @@ impl CancellationToken {
         Self { notify }
     }
 
-    /// The shutdown source to hand to the server this token controls.
     pub fn shutdown_source(&self) -> ShutdownSource {
         ShutdownSource::Embedded(Arc::clone(&self.notify))
     }
 
-    /// Asks the server to stop.
-    ///
-    /// A permit is stored rather than broadcast, so a host that stops the server before
-    /// it has finished starting is still obeyed instead of being ignored.
+    /// Stores a permit, so a stop that arrives before the server starts is not lost.
     pub fn cancel(&self) {
         self.notify.notify_one();
     }
@@ -47,7 +40,6 @@ mod tests {
             .expect("cancelling the token must release a server waiting on its source");
     }
 
-    /// A host must never find that the server has quietly taken over its console.
     #[test]
     fn given_a_token_when_it_produces_a_source_then_the_server_leaves_the_console_alone() {
         let token = CancellationToken::new(Arc::new(Notify::new()));

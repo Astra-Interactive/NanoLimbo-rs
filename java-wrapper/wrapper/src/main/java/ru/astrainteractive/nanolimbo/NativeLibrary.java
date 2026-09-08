@@ -11,43 +11,30 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Locale;
 
-/**
- * The NanoLimbo-rs cdylib, as C sees it.
- *
- * <p>The method names are the exported symbols, so they keep the snake_case spelling of the Rust
- * side; JNA binds by name and a Java-style rename would not resolve.
- *
- * <p>The cdylib is not on the library path of a proxy JVM, so {@link #load()} unpacks the build for
- * the running platform out of this jar first.
- */
+/** Method names are the exported symbols: JNA binds by name, so a Java-style rename would not resolve. */
 public interface NativeLibrary extends Library {
 
     /**
      * {@code CancellationToken* get_cancellation_token(void);}
      *
-     * @return the token that ties {@code start_app} to {@code stop_app}, or {@code null} when the
-     *     allocation failed.
+     * @return {@code null} when the allocation failed
      */
     Pointer get_cancellation_token();
 
     /**
-     * {@code int32_t start_app(CancellationToken* ptr, const char* config_dir);}
+     * {@code int32_t start_app(CancellationToken* ptr, const char* config_dir);} Blocks until the
+     * token is cancelled.
      *
-     * <p>Blocks until the token is cancelled. The server reads, and on a first run writes,
-     * {@code settings.yml} inside {@code config_dir}.
-     *
-     * @return one of the codes {@link StartAppStatus} lists.
+     * @return one of the codes {@link StartAppStatus} lists
      */
     int start_app(Pointer token, Pointer configurationDirectory);
 
-    /**
-     * {@code void stop_app(CancellationToken* ptr);} Cancels the token and returns at once.
-     */
+    /** {@code void stop_app(CancellationToken* ptr);} Returns at once. */
     void stop_app(Pointer token);
 
     /**
-     * {@code void cleanup_token(CancellationToken* ptr);} Frees the token. Calling it while
-     * {@code start_app} still holds the token is a use-after-free.
+     * {@code void cleanup_token(CancellationToken* ptr);} Calling it while {@code start_app} still
+     * holds the token is a use-after-free.
      */
     void cleanup_token(Pointer token);
 
@@ -97,10 +84,11 @@ public interface NativeLibrary extends Library {
     }
 
     /**
-     * Unpacks the cdylib built for the running platform and binds to it.
+     * Unpacks the cdylib out of this jar, since a proxy JVM has no reason to carry it on its
+     * library path.
      *
-     * @throws IOException when the jar carries no build for this platform, or unpacking it fails.
-     * @throws UnsupportedOperationException when no build for this platform exists at all.
+     * @throws UnsupportedOperationException when no build exists for this platform
+     * @throws IOException when this jar carries none at the expected path, or unpacking fails
      */
     static NativeLibrary load() throws IOException {
         String libraryName = BuildConstants.LIB_NAME;

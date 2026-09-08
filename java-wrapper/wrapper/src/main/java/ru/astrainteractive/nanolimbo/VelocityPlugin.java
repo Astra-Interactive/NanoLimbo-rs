@@ -14,10 +14,6 @@ import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Runs NanoLimbo-rs inside the Velocity JVM, with {@code settings.yml} in the plugin's own data
- * directory rather than in the proxy root.
- */
 @Plugin(
         id = BuildConstants.PLUGIN_ID,
         name = "NanoLimbo-rs",
@@ -28,8 +24,8 @@ import java.util.logging.Logger;
 public final class VelocityPlugin {
 
     /**
-     * The runner is shared with BungeeCord and standalone, so it logs through the JDK rather than
-     * through this proxy's SLF4J binding. One logger here keeps both sides on the same stream.
+     * The runner is shared with the BungeeCord and standalone entry points, so it logs through the
+     * JDK rather than Velocity's SLF4J binding.
      */
     private static final Logger LOGGER = Logger.getLogger(VelocityPlugin.class.getName());
 
@@ -48,8 +44,7 @@ public final class VelocityPlugin {
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
         try {
-            // A no-op when the directory is already there; the Rust side writes settings.yml into
-            // it but does not create it.
+            // The Rust side writes settings.yml into this directory but will not create it.
             Files.createDirectories(dataDirectory);
             runner = new NanoLimboRunner(NativeLibrary.load(), dataDirectory, LOGGER);
             task = proxy.getScheduler()
