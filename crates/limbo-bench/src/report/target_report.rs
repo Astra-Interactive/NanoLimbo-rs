@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::resident_memory::ResidentMemory;
+use crate::memory::ResidentMemory;
 
 /// What one server did when the players arrived.
 pub struct TargetReport {
@@ -17,8 +17,12 @@ pub struct TargetReport {
 }
 
 impl TargetReport {
+    /// Below this many players the per-player figure is mostly startup noise: a runtime that
+    /// allocates in chunks, or warms up as it goes, spreads a fixed cost over too few players.
+    const RELIABLE_PLAYER_COUNT: usize = 200;
+
     /// A server that never accepted a connection, so nothing about it was measured.
-    pub fn unreachable(target: &crate::bench_target::BenchTarget, requested: usize) -> Self {
+    pub fn unreachable(target: &crate::options::BenchTarget, requested: usize) -> Self {
         Self {
             name: target.name.clone(),
             requested,
@@ -47,67 +51,64 @@ impl TargetReport {
             .checked_sub(idle)
             .map(|growth| growth as f64 / players as f64)
     }
-}
 
-fn megabytes(memory: Option<ResidentMemory>) -> String {
-    match memory {
-        Some(reading) => format!("{:.1} MB", reading.megabytes()),
-        None => "n/a".to_owned(),
-    }
-}
-
-fn kilobytes(bytes: Option<f64>) -> String {
-    match bytes {
-        Some(per_player) => format!("{:.1} KB", per_player / 1024.0),
-        None => "n/a".to_owned(),
-    }
-}
-
-/// Below this many players the per-player figure is mostly startup noise: a runtime that
-/// allocates in chunks, or warms up as it goes, spreads a fixed cost over too few players.
-const RELIABLE_PLAYER_COUNT: usize = 200;
-
-/// Prints the comparison as a table, widest column first so the numbers line up.
-pub fn print_table(reports: &[TargetReport]) {
-    println!(
-        "\n{:<10} {:>7} {:>7} {:>9} {:>10} {:>11} {:>12} {:>12}",
-        "target", "asked", "joined", "time", "idle", "loaded", "mem/player", "join bytes"
-    );
-    println!("{}", "-".repeat(84));
-
-    for report in reports {
-        println!(
-            "{:<10} {:>7} {:>7} {:>8.2}s {:>10} {:>11} {:>12} {:>12}",
-            report.name,
-            report.requested,
-            report.logged_in,
-            report.elapsed.as_secs_f64(),
-            megabytes(report.idle_memory),
-            megabytes(report.loaded_memory),
-            kilobytes(report.per_player_bytes()),
-            kilobytes(report.join_bytes.map(|bytes| bytes as f64)),
-        );
-    }
-
-    if reports
-        .iter()
-        .any(|report| report.logged_in < RELIABLE_PLAYER_COUNT)
-    {
-        println!(
-            "\nFewer than {RELIABLE_PLAYER_COUNT} players joined, so mem/player is mostly \
-             startup cost spread thin. Raise --players for a figure worth quoting."
-        );
-    }
-
-    for report in reports {
-        if let Some(reason) = &report.first_failure {
-            println!(
-                "\n{}: stopped after {} of {} — {reason}",
-                report.name, report.logged_in, report.requested
-            );
+    fn megabytes(memory: Option<ResidentMemory>) -> String {
+        match memory {
+            Some(reading) => format!("{:.1} MB", reading.megabytes()),
+            None => "n/a".to_owned(),
         }
     }
-    println!();
+
+    fn kilobytes(bytes: Option<f64>) -> String {
+        match bytes {
+            Some(per_player) => format!("{:.1} KB", per_player / 1024.0),
+            None => "n/a".to_owned(),
+        }
+    }
+
+    /// Prints the comparison as a table, widest column first so the numbers line up.
+    pub fn print_table(reports: &[Self]) {
+        println!(
+            "\n{:<10} {:>7} {:>7} {:>9} {:>10} {:>11} {:>12} {:>12}",
+            "target", "asked", "joined", "time", "idle", "loaded", "mem/player", "join bytes"
+        );
+        println!("{}", "-".repeat(84));
+
+        for report in reports {
+            println!(
+                "{:<10} {:>7} {:>7} {:>8.2}s {:>10} {:>11} {:>12} {:>12}",
+                report.name,
+                report.requested,
+                report.logged_in,
+                report.elapsed.as_secs_f64(),
+                Self::megabytes(report.idle_memory),
+                Self::megabytes(report.loaded_memory),
+                Self::kilobytes(report.per_player_bytes()),
+                Self::kilobytes(report.join_bytes.map(|bytes| bytes as f64)),
+            );
+        }
+
+        if reports
+            .iter()
+            .any(|report| report.logged_in < Self::RELIABLE_PLAYER_COUNT)
+        {
+            println!(
+                "\nFewer than {} players joined, so mem/player is mostly \
+                 startup cost spread thin. Raise --players for a figure worth quoting.",
+                Self::RELIABLE_PLAYER_COUNT
+            );
+        }
+
+        for report in reports {
+            if let Some(reason) = &report.first_failure {
+                println!(
+                    "\n{}: stopped after {} of {} — {reason}",
+                    report.name, report.logged_in, report.requested
+                );
+            }
+        }
+        println!();
+    }
 }
 
 #[cfg(test)]

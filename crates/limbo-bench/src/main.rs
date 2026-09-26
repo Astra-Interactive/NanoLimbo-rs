@@ -6,26 +6,15 @@
 //! It speaks the protocol through the same version tables the server uses, so a new
 //! Minecraft release cannot leave it silently measuring a failed login.
 
-mod bench_error;
-mod bench_options;
-mod bench_target;
-mod login_client;
-mod memory_source;
-mod resident_memory;
-mod target_report;
-
 use std::process::ExitCode;
 use std::time::{Duration, Instant};
+
+use limbo_bench::{BenchOptions, BenchTarget, LoginClient, ResidentMemory, TargetReport};
 
 /// How long one player waits for the server to stop sending before calling the join done.
 ///
 /// Well below the five-second keep alive, so a keep alive never extends it.
 const JOIN_QUIET_PERIOD: Duration = Duration::from_millis(400);
-
-use crate::bench_options::BenchOptions;
-use crate::bench_target::BenchTarget;
-use crate::login_client::LoginClient;
-use crate::target_report::{TargetReport, print_table};
 
 const USAGE: &str = "\
 usage: limbo-bench [options] <name=address[@pid]>...
@@ -75,7 +64,7 @@ async fn measure(target: &BenchTarget, options: &BenchOptions) -> TargetReport {
     if !wait_until_serving(target, options).await {
         return TargetReport::unreachable(target, options.players);
     }
-    let idle_memory = target.memory.as_ref().and_then(resident_memory::of_source);
+    let idle_memory = target.memory.as_ref().and_then(ResidentMemory::of_source);
 
     let mut held = Vec::with_capacity(options.players);
     let mut first_failure = None;
@@ -103,7 +92,7 @@ async fn measure(target: &BenchTarget, options: &BenchOptions) -> TargetReport {
 
     // Let the server finish whatever the arrival burst started before reading memory.
     tokio::time::sleep(options.settle).await;
-    let loaded_memory = target.memory.as_ref().and_then(resident_memory::of_source);
+    let loaded_memory = target.memory.as_ref().and_then(ResidentMemory::of_source);
 
     TargetReport {
         name: target.name.clone(),
@@ -136,7 +125,7 @@ async fn run(options: BenchOptions) -> bool {
         reports.push(measure(target, &options).await);
     }
 
-    print_table(&reports);
+    TargetReport::print_table(&reports);
     reports.iter().all(|report| report.logged_in > 0)
 }
 

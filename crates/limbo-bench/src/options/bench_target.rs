@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
-use crate::bench_error::BenchError;
-use crate::memory_source::MemorySource;
+use crate::memory::MemorySource;
+use crate::options::BenchError;
 
 /// One server to measure.
 ///

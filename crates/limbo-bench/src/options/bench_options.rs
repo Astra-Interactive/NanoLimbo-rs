@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::bench_error::BenchError;
-use crate::bench_target::BenchTarget;
+use crate::options::BenchError;
+use crate::options::BenchTarget;
 
 /// How many players to log in when nothing is asked for.
 const DEFAULT_PLAYERS: usize = 300;
