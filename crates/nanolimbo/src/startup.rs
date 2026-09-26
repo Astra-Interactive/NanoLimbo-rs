@@ -4,7 +4,7 @@ use std::path::Path;
 use std::sync::Arc;
 
 use limbo_config::{ConfigLoader, DiskFileSystem};
-use limbo_server::connection_registry::ConnectionRegistry;
+use limbo_server::player::ConnectionRegistry;
 use limbo_world::{DimensionRegistry, UpdateTagsRegistry};
 use tokio::net::TcpListener;
 use tokio::sync::broadcast;

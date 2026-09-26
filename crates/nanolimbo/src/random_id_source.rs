@@ -1,4 +1,4 @@
-use limbo_server::id_source::IdSource;
+use limbo_server::id::IdSource;
 use rand::Rng;
 use uuid::Uuid;
 

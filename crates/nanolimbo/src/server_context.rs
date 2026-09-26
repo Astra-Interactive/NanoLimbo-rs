@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use limbo_config::{InfoForwarding, LimboConfig};
 use limbo_net::forwarding::{BungeeGuardVerifier, ModernForwardingVerifier};
-use limbo_server::connection_registry::ConnectionRegistry;
-use limbo_server::forwarding_mode::ForwardingMode;
-use limbo_server::server_policy::ServerPolicy;
+use limbo_server::connection::ForwardingMode;
+use limbo_server::connection::ServerPolicy;
+use limbo_server::player::ConnectionRegistry;
 
 use crate::packet_snapshots::PacketSnapshots;
 use crate::random_id_source::RandomIdSource;

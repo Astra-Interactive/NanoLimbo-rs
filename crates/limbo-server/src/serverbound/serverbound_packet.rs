@@ -3,10 +3,10 @@ use limbo_protocol::buffer::{PacketDecodeError, ProtocolRead};
 use limbo_protocol::packet::{PacketKind, PacketRoute};
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::handshake::Handshake;
-use crate::login_plugin_response::LoginPluginResponse;
-use crate::login_start::LoginStart;
-use crate::plugin_message::PluginMessage;
+use crate::serverbound::Handshake;
+use crate::serverbound::LoginPluginResponse;
+use crate::serverbound::LoginStart;
+use crate::serverbound::PluginMessage;
 
 /// A client may advertise at most this many resource packs it already has.
 const MAX_KNOWN_PACKS: i32 = 16;
@@ -120,7 +120,7 @@ mod tests {
     use limbo_protocol::buffer::ProtocolWrite;
     use limbo_protocol::packet::{ConnectionState, PacketDirection};
 
-    use crate::client_intent::ClientIntent;
+    use crate::serverbound::ClientIntent;
 
     use super::*;
 

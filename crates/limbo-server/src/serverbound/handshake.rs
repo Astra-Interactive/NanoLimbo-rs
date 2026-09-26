@@ -1,7 +1,7 @@
 use bytes::Buf;
 use limbo_protocol::buffer::{PacketDecodeError, ProtocolRead};
 
-use crate::client_intent::ClientIntent;
+use crate::serverbound::ClientIntent;
 
 /// Longest host a client may claim to have connected to.
 ///

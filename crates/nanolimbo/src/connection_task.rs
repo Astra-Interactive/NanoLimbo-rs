@@ -17,13 +17,13 @@ use limbo_packet::{ClientboundPacket, PreEncodedPacket};
 use limbo_protocol::buffer::{ProtocolRead, ProtocolWrite};
 use limbo_protocol::packet::{ConnectionState, PacketDirection, PacketKind, PacketRoute};
 use limbo_protocol::version::ProtocolVersion;
-use limbo_server::connected_player::ConnectedPlayer;
-use limbo_server::connection_action::ConnectionAction;
-use limbo_server::connection_flow::ConnectionFlow;
-use limbo_server::connection_id::ConnectionId;
-use limbo_server::forwarding_mode::ForwardingMode;
-use limbo_server::id_source::IdSource;
-use limbo_server::serverbound_packet::ServerBoundPacket;
+use limbo_server::connection::ConnectionAction;
+use limbo_server::connection::ConnectionFlow;
+use limbo_server::connection::ForwardingMode;
+use limbo_server::id::IdSource;
+use limbo_server::player::ConnectedPlayer;
+use limbo_server::player::ConnectionId;
+use limbo_server::serverbound::ServerBoundPacket;
 use limbo_text::chat::Component;
 use tokio::net::TcpStream;
 use tokio_util::codec::Framed;
@@ -671,7 +671,7 @@ fn adopt_identity(session: &mut Session, packet: &ServerBoundPacket) -> Vec<Conn
 
 fn accept_velocity_reply(
     session: &mut Session,
-    response: &limbo_server::login_plugin_response::LoginPluginResponse,
+    response: &limbo_server::serverbound::LoginPluginResponse,
 ) -> Vec<ConnectionAction> {
     if !session.flow.forwarding_reply_matches(response.message_id) {
         return Vec::new();

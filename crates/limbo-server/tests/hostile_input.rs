@@ -13,7 +13,7 @@
 
 use limbo_protocol::packet::{ConnectionState, PacketDirection, PacketRoute};
 use limbo_protocol::version::ProtocolVersion;
-use limbo_server::serverbound_packet::ServerBoundPacket;
+use limbo_server::serverbound::ServerBoundPacket;
 
 /// Enough to cover every id the server maps, plus the space around them.
 const IDS: [i32; 12] = [

@@ -2,11 +2,11 @@ use limbo_protocol::packet::ConnectionState;
 use limbo_protocol::version::ProtocolVersion;
 use limbo_text::chat::Component;
 
-use crate::connection_action::ConnectionAction;
-use crate::forwarding_mode::ForwardingMode;
-use crate::game_profile::GameProfile;
-use crate::server_policy::ServerPolicy;
-use crate::serverbound_packet::ServerBoundPacket;
+use crate::connection::ConnectionAction;
+use crate::connection::ForwardingMode;
+use crate::connection::ServerPolicy;
+use crate::player::GameProfile;
+use crate::serverbound::ServerBoundPacket;
 
 /// Clients up to this version need the play burst delayed.
 const LAST_VERSION_NEEDING_SPAWN_DELAY: ProtocolVersion = ProtocolVersion::V1_7_6;
@@ -111,7 +111,7 @@ impl ConnectionFlow {
         ]
     }
 
-    fn on_handshake(&mut self, packet: &crate::handshake::Handshake) -> Vec<ConnectionAction> {
+    fn on_handshake(&mut self, packet: &crate::serverbound::Handshake) -> Vec<ConnectionAction> {
         let Some(intent) = packet.intent else {
             return vec![refused("Invalid handshake intent!")];
         };
@@ -244,9 +244,9 @@ mod tests {
     use limbo_protocol::buffer::ProtocolWrite;
     use limbo_protocol::packet::{PacketDirection, PacketRoute};
 
-    use crate::client_intent::ClientIntent;
-    use crate::handshake::Handshake;
-    use crate::login_start::LoginStart;
+    use crate::serverbound::ClientIntent;
+    use crate::serverbound::Handshake;
+    use crate::serverbound::LoginStart;
 
     use super::*;
 

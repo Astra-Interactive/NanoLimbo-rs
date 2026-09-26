@@ -2,8 +2,8 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use crate::connected_player::ConnectedPlayer;
-use crate::connection_id::ConnectionId;
+use crate::player::ConnectedPlayer;
+use crate::player::ConnectionId;
 
 /// Everyone currently past the login phase.
 ///

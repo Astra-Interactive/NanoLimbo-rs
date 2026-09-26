@@ -1,4 +1,4 @@
-use crate::forwarding_mode::ForwardingMode;
+use crate::connection::ForwardingMode;
 
 /// The configured facts the connection state machine consults.
 ///

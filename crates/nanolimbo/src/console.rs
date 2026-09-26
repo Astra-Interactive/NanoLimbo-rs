@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use limbo_server::connection_registry::ConnectionRegistry;
-use limbo_server::console_command::ConsoleCommand;
-use limbo_server::memory_usage;
+use limbo_server::console::ConsoleCommand;
+use limbo_server::console::MemoryUsage;
+use limbo_server::player::ConnectionRegistry;
 use tokio::sync::{broadcast, mpsc};
 
 /// Reads console input on a blocking thread and reports each line.
@@ -27,7 +27,7 @@ pub fn read_lines() -> mpsc::Receiver<String> {
 }
 
 fn describe_memory() {
-    match memory_usage::current() {
+    match MemoryUsage::current() {
         Some(usage) => tracing::info!("Memory used: {} MB", usage.resident_megabytes()),
         None => tracing::info!("Memory usage is not available on this platform"),
     }

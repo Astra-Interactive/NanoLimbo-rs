@@ -13,7 +13,7 @@ use limbo_packet::play::{
 };
 use limbo_packet::{PacketEncodeError, PreEncodedPacket};
 use limbo_protocol::version::ProtocolVersion;
-use limbo_server::id_source::IdSource;
+use limbo_server::id::IdSource;
 use limbo_world::{DimensionRegistry, UpdateTagsRegistry, VersionedDimension};
 use uuid::Uuid;
 
