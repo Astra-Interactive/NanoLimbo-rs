@@ -4,9 +4,9 @@ use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 use limbo_world::{Dimension, VersionedDimension, write_compound};
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
-use crate::write_bool::write_bool;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
+use crate::encoding::write_bool;
 
 /// Spectator mode, the only game mode 1.7 does not have and so has to be mapped away.
 const GAME_MODE_SPECTATOR: i32 = 3;

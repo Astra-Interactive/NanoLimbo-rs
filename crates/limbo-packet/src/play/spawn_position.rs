@@ -3,8 +3,8 @@ use limbo_protocol::buffer::ProtocolWrite;
 use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 /// Packs a block position into the protocol's single long: 26 bits of X, 26 of Z and 12
 /// of Y, each truncated to its field rather than range-checked.

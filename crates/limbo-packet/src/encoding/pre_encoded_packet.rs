@@ -3,8 +3,8 @@ use std::collections::{HashMap, HashSet};
 use bytes::{Bytes, BytesMut};
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 /// A packet encoded once per protocol version, ready to be written to any client.
 ///

@@ -3,11 +3,11 @@ use limbo_protocol::buffer::ProtocolWrite;
 use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
-use crate::play::title_set_subtitle::TitleSetSubTitle;
-use crate::play::title_set_title::TitleSetTitle;
-use crate::play::title_times::TitleTimes;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
+use crate::play::TitleSetSubTitle;
+use crate::play::TitleSetTitle;
+use crate::play::TitleTimes;
 
 /// One title packet carrying an action id, as clients before 1.17 read it.
 ///

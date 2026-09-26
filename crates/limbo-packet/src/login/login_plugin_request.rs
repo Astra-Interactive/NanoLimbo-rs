@@ -3,8 +3,8 @@ use limbo_protocol::buffer::ProtocolWrite;
 use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 /// Asks a modded client, or a proxy speaking for one, to answer on a private channel.
 ///

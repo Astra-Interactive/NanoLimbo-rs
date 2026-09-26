@@ -6,10 +6,10 @@ use limbo_text::chat::Component;
 use limbo_text::write_component;
 use uuid::Uuid;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
-use crate::play::boss_bar_color::BossBarColor;
-use crate::play::boss_bar_division::BossBarDivision;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
+use crate::play::BossBarColor;
+use crate::play::BossBarDivision;
 
 /// The only boss bar action the limbo sends: create the bar.
 const ACTION_ADD: i32 = 0;

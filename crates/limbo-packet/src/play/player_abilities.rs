@@ -2,8 +2,8 @@ use bytes::BufMut;
 use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 const FLAG_INVINCIBLE: u8 = 0x01;
 const FLAG_FLYING: u8 = 0x02;

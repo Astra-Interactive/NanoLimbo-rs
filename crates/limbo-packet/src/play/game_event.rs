@@ -2,8 +2,8 @@ use bytes::BufMut;
 use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 /// A world-level notification, of which the limbo sends one: "start waiting for chunks",
 /// which is what makes a 1.20.3 client draw the world instead of the loading screen.

@@ -4,9 +4,9 @@ use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 use uuid::Uuid;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
-use crate::write_bool::write_bool;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
+use crate::encoding::write_bool;
 
 /// The actions this packet carries, as the bit set 1.19.3 replaced the action id with:
 /// `add_player` is bit 0, `update_gamemode` bit 2 and `update_listed` bit 3.

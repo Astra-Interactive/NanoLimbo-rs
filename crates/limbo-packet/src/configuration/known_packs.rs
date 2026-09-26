@@ -3,9 +3,9 @@ use limbo_protocol::buffer::ProtocolWrite;
 use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::configuration::known_pack::KnownPack;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::configuration::KnownPack;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 /// Offers the client the data packs the server has, from 1.20.5.
 ///

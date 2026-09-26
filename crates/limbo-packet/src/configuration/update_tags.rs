@@ -4,8 +4,8 @@ use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 use limbo_world::TagRegistry;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 /// Tells the client which registry entries belong to which tag, from 1.20.5.
 ///

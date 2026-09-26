@@ -5,8 +5,8 @@ use limbo_protocol::version::ProtocolVersion;
 use limbo_text::chat::Component;
 use limbo_text::to_json_for;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 /// Refuses a login, saying why.
 ///

@@ -5,9 +5,9 @@ use limbo_protocol::version::ProtocolVersion;
 use limbo_world::write_compound;
 use valence_nbt::{Compound, List, Value};
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::configuration::registry_entry::RegistryEntry;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::configuration::RegistryEntry;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 fn registry_values(registry: &Value) -> &[Compound] {
     match registry {

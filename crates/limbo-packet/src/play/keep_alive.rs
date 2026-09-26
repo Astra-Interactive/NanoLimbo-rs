@@ -3,8 +3,8 @@ use limbo_protocol::buffer::ProtocolWrite;
 use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 /// Proves the connection is alive; the client echoes the id back unchanged.
 ///

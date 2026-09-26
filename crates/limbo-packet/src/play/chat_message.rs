@@ -6,10 +6,10 @@ use limbo_text::chat::Component;
 use limbo_text::write_component;
 use uuid::Uuid;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
-use crate::play::chat_position::ChatPosition;
-use crate::write_bool::write_bool;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
+use crate::encoding::write_bool;
+use crate::play::ChatPosition;
 
 /// A message from the server, shown in chat, as a system message or on the action bar.
 pub struct ChatMessage<'a> {

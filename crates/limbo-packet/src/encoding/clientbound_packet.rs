@@ -2,7 +2,7 @@ use bytes::BufMut;
 use limbo_protocol::packet::PacketKind;
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::PacketEncodeError;
 
 /// A packet the server sends, able to write itself for any protocol version.
 ///

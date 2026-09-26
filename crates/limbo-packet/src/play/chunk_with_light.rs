@@ -5,8 +5,8 @@ use limbo_protocol::version::ProtocolVersion;
 use limbo_world::{Dimension, VersionedDimension, write_compound};
 use valence_nbt::{Compound, Value};
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
 
 /// Longs a `MOTION_BLOCKING` heightmap occupies: 256 columns of nine bits, packed seven
 /// to a long.

@@ -6,9 +6,9 @@ use limbo_text::chat::Component;
 use limbo_text::to_json_for;
 use serde_json::Value;
 
-use crate::clientbound_packet::ClientboundPacket;
-use crate::packet_encode_error::PacketEncodeError;
-use crate::status::status_player::StatusPlayer;
+use crate::encoding::ClientboundPacket;
+use crate::encoding::PacketEncodeError;
+use crate::status::StatusPlayer;
 
 /// Renders `text` as a JSON string literal, escaped the way the protocol requires.
 fn json_string(text: &str) -> String {
