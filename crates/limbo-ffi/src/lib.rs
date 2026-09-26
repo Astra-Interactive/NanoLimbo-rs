@@ -21,3 +21,7 @@ pub mod embedding {
 }
 
 pub use embedding::{cleanup_token, get_cancellation_token, start_app, stop_app};
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;
