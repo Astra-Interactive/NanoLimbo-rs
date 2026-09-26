@@ -5,8 +5,8 @@ use limbo_protocol::version::ProtocolVersion;
 use valence_nbt::Compound;
 use valence_nbt::binary::from_binary;
 
-use crate::resource_load_error::ResourceLoadError;
-use crate::version_match::VersionMatch;
+use crate::resource::ResourceLoadError;
+use crate::resource::VersionMatch;
 
 /// One rung of a version-selection ladder: a gzip-compressed NBT resource compiled into
 /// the binary, plus the comparison that decides whether this rung serves a given client.
@@ -85,8 +85,8 @@ mod tests {
 
     use valence_nbt::binary::to_binary;
 
-    use crate::dimension_registry::CODEC_LADDER;
-    use crate::update_tags_registry::TAG_LADDER;
+    use crate::codec::dimension_registry::CODEC_LADDER;
+    use crate::tag::update_tags_registry::TAG_LADDER;
 
     use super::*;
 

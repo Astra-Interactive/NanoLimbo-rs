@@ -1,12 +1,12 @@
 use limbo_protocol::version::ProtocolVersion;
 use valence_nbt::{Compound, List, Value};
 
-use crate::resource_load_error::ResourceLoadError;
-use crate::resource_selection::ResourceSelection;
-use crate::tag_entry::TagEntry;
-use crate::tag_registry::TagRegistry;
-use crate::update_tags_error::UpdateTagsError;
-use crate::version_match::VersionMatch;
+use crate::resource::ResourceLoadError;
+use crate::resource::ResourceSelection;
+use crate::resource::VersionMatch;
+use crate::tag::TagEntry;
+use crate::tag::TagRegistry;
+use crate::tag::UpdateTagsError;
 
 /// Which tag set each protocol version receives, transcribed rung by rung from Java's
 /// `DimensionRegistry.createUpdateTags`.
@@ -18,57 +18,57 @@ use crate::version_match::VersionMatch;
 pub(crate) static TAG_LADDER: &[ResourceSelection] = &[
     ResourceSelection::new(
         "tags_26_2.nbt",
-        include_bytes!("../resources/dimension/tags_26_2.nbt"),
+        include_bytes!("../../resources/dimension/tags_26_2.nbt"),
         VersionMatch::AtLeast(ProtocolVersion::V26_2),
     ),
     ResourceSelection::new(
         "tags_26_1.nbt",
-        include_bytes!("../resources/dimension/tags_26_1.nbt"),
+        include_bytes!("../../resources/dimension/tags_26_1.nbt"),
         VersionMatch::AtLeast(ProtocolVersion::V26_1),
     ),
     ResourceSelection::new(
         "tags_1_21_11.nbt",
-        include_bytes!("../resources/dimension/tags_1_21_11.nbt"),
+        include_bytes!("../../resources/dimension/tags_1_21_11.nbt"),
         VersionMatch::AtLeast(ProtocolVersion::V1_21_11),
     ),
     ResourceSelection::new(
         "tags_1_21_9.nbt",
-        include_bytes!("../resources/dimension/tags_1_21_9.nbt"),
+        include_bytes!("../../resources/dimension/tags_1_21_9.nbt"),
         VersionMatch::Exactly(ProtocolVersion::V1_21_9),
     ),
     ResourceSelection::new(
         "tags_1_21_7.nbt",
-        include_bytes!("../resources/dimension/tags_1_21_7.nbt"),
+        include_bytes!("../../resources/dimension/tags_1_21_7.nbt"),
         VersionMatch::Exactly(ProtocolVersion::V1_21_7),
     ),
     ResourceSelection::new(
         "tags_1_21_6.nbt",
-        include_bytes!("../resources/dimension/tags_1_21_6.nbt"),
+        include_bytes!("../../resources/dimension/tags_1_21_6.nbt"),
         VersionMatch::Exactly(ProtocolVersion::V1_21_6),
     ),
     ResourceSelection::new(
         "tags_1_21_5.nbt",
-        include_bytes!("../resources/dimension/tags_1_21_5.nbt"),
+        include_bytes!("../../resources/dimension/tags_1_21_5.nbt"),
         VersionMatch::Exactly(ProtocolVersion::V1_21_5),
     ),
     ResourceSelection::new(
         "tags_1_21_4.nbt",
-        include_bytes!("../resources/dimension/tags_1_21_4.nbt"),
+        include_bytes!("../../resources/dimension/tags_1_21_4.nbt"),
         VersionMatch::Exactly(ProtocolVersion::V1_21_4),
     ),
     ResourceSelection::new(
         "tags_1_21_2.nbt",
-        include_bytes!("../resources/dimension/tags_1_21_2.nbt"),
+        include_bytes!("../../resources/dimension/tags_1_21_2.nbt"),
         VersionMatch::Exactly(ProtocolVersion::V1_21_2),
     ),
     ResourceSelection::new(
         "tags_1_21.nbt",
-        include_bytes!("../resources/dimension/tags_1_21.nbt"),
+        include_bytes!("../../resources/dimension/tags_1_21.nbt"),
         VersionMatch::Exactly(ProtocolVersion::V1_21),
     ),
     ResourceSelection::new(
         "tags_1_20_5.nbt",
-        include_bytes!("../resources/dimension/tags_1_20_5.nbt"),
+        include_bytes!("../../resources/dimension/tags_1_20_5.nbt"),
         VersionMatch::Any,
     ),
 ];

@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::dimension_lookup_error::DimensionLookupError;
-use crate::dimension_registry::DimensionRegistry;
-use crate::versioned_dimension::VersionedDimension;
+use crate::codec::DimensionLookupError;
+use crate::codec::DimensionRegistry;
+use crate::codec::VersionedDimension;
 
 /// A dimension the limbo world can be placed in.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -67,7 +67,7 @@ impl DimensionType {
 #[cfg(test)]
 mod tests {
 
-    use crate::dimension::Dimension;
+    use crate::codec::Dimension;
 
     use super::*;
 

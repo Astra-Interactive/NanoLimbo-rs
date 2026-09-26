@@ -1,4 +1,4 @@
-use crate::tag_entry::TagEntry;
+use crate::tag::TagEntry;
 
 /// Every tag defined for one registry, in the order the resource declares them.
 pub struct TagRegistry {

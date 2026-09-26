@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use limbo_protocol::version::ProtocolVersion;
 
-use crate::dimension::Dimension;
+use crate::codec::Dimension;
 
 /// One dimension, resolved ahead of time against every protocol version the server
 /// speaks.
