@@ -1,5 +1,5 @@
-use crate::chat::component_content::ComponentContent;
-use crate::chat::style::Style;
+use crate::chat::ComponentContent;
+use crate::chat::Style;
 
 /// A piece of formatted text, as the client understands it.
 ///

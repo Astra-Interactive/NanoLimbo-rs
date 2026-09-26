@@ -1,6 +1,6 @@
-use crate::chat::click_event::ClickEvent;
-use crate::chat::hover_event::HoverEvent;
-use crate::chat::text_color::TextColor;
+use crate::chat::ClickEvent;
+use crate::chat::HoverEvent;
+use crate::chat::TextColor;
 
 /// Presentation applied to a component and inherited by its children.
 ///

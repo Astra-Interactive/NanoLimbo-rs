@@ -1,6 +1,6 @@
 use crate::chat::Component;
-use crate::legacy_codes::legacy_codes_to_tags;
-use crate::mini_message::parse_mini_message;
+use crate::markup::legacy_codes_to_tags;
+use crate::markup::parse_mini_message;
 
 /// Parses a line of configured text into a component.
 ///
@@ -13,7 +13,7 @@ pub fn parse(input: &str) -> Component {
         return Component::empty();
     }
 
-    if let Some(component) = crate::component_json::from_json_str(input) {
+    if let Some(component) = crate::wire::from_json_str(input) {
         return component;
     }
 

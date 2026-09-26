@@ -5,7 +5,7 @@ use serde_json::{Map, Value};
 use crate::chat::{
     ClickEvent, Component, ComponentContent, HoverEvent, NamedColor, Style, TextColor,
 };
-use crate::json_profile::JsonProfile;
+use crate::wire::JsonProfile;
 
 /// Serializes a colour the way the client for this profile expects it.
 ///

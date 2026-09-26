@@ -2,8 +2,8 @@ use serde_json::Value as JsonValue;
 use valence_nbt::{Compound, List, Value as NbtValue};
 
 use crate::chat::Component;
-use crate::component_json::build_value;
-use crate::json_profile::JsonProfile;
+use crate::wire::JsonProfile;
+use crate::wire::build_value;
 
 fn json_to_nbt(value: &JsonValue) -> Option<NbtValue> {
     match value {

@@ -1,4 +1,4 @@
-use crate::chat::component::Component;
+use crate::chat::Component;
 
 /// What a component says, as opposed to how it looks.
 ///

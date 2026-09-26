@@ -1,4 +1,4 @@
-use crate::chat::rgb_color::RgbColor;
+use crate::chat::RgbColor;
 
 /// The sixteen colours the protocol has carried by name since the beginning.
 ///

@@ -3,9 +3,9 @@ use limbo_protocol::buffer::{NbtEncodeError, ProtocolWrite, write_compound};
 use limbo_protocol::version::ProtocolVersion;
 
 use crate::chat::Component;
-use crate::component_json::to_json_string;
-use crate::component_nbt::to_nbt_compound;
-use crate::json_profile::JsonProfile;
+use crate::wire::JsonProfile;
+use crate::wire::to_json_string;
+use crate::wire::to_nbt_compound;
 
 /// The first version whose client reads chat components as NBT rather than as JSON text.
 const FIRST_NBT_COMPONENT_VERSION: ProtocolVersion = ProtocolVersion::V1_20_3;

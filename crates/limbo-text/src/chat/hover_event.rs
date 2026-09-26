@@ -1,4 +1,4 @@
-use crate::chat::component::Component;
+use crate::chat::Component;
 
 /// What the client shows when the pointer rests on the text.
 ///

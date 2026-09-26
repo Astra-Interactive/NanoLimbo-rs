@@ -1,7 +1,7 @@
 use crate::chat::{
     ClickEvent, Component, ComponentContent, HoverEvent, NamedColor, RgbColor, Style, TextColor,
 };
-use crate::mini_message_node::MiniMessageNode;
+use crate::markup::MiniMessageNode;
 
 /// Tags that insert content and then end, rather than styling what follows them.
 const INLINE_TAGS: [&str; 7] = ["newline", "br", "key", "lang", "translate", "tr", "reset"];
