@@ -36,7 +36,7 @@ fn read_external_file<F: ConfigFileSystem>(
 
 /// One token per line. Blank lines and `#` comments are skipped so the file can say which
 /// proxy each token belongs to.
-fn token_lines(content: &str) -> Vec<String> {
+pub(crate) fn token_lines(content: &str) -> Vec<String> {
     content
         .lines()
         .map(str::trim)
@@ -148,22 +148,5 @@ pub fn resolve_info_forwarding<F: ConfigFileSystem>(
         _ => Err(SettingsError::UnknownForwardingType {
             value: configured.to_owned(),
         }),
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn given_a_token_file_when_its_lines_are_read_then_comments_and_blanks_are_skipped() {
-        let content = "# proxy one\nfirst\n\n   second   \n#trailing note\n";
-
-        assert_eq!(token_lines(content), ["first", "second"]);
-    }
-
-    #[test]
-    fn given_a_file_of_only_comments_when_its_lines_are_read_then_there_are_no_tokens() {
-        assert!(token_lines("# nothing here\n\n").is_empty());
     }
 }

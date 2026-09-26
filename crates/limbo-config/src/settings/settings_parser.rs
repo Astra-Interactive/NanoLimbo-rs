@@ -42,21 +42,21 @@ fn text(configured: &ScalarText) -> Component {
 
 /// A timeout that a non-positive value switches off, which is what the idle handler the
 /// reference implementation used did with anything at or below zero.
-fn optional_millis(millis: i64) -> Option<Duration> {
+pub(crate) fn optional_millis(millis: i64) -> Option<Duration> {
     u64::try_from(millis)
         .ok()
         .filter(|&value| value > 0)
         .map(Duration::from_millis)
 }
 
-fn optional_seconds(seconds: f64) -> Option<Duration> {
+pub(crate) fn optional_seconds(seconds: f64) -> Option<Duration> {
     if seconds <= 0.0 {
         return None;
     }
     Duration::try_from_secs_f64(seconds).ok()
 }
 
-fn optional_rate(rate: f64) -> Option<f64> {
+pub(crate) fn optional_rate(rate: f64) -> Option<f64> {
     (rate > 0.0).then_some(rate)
 }
 
@@ -65,7 +65,7 @@ fn optional_size(size: i32) -> Option<u32> {
 }
 
 /// Netty read a thread count of zero as "size the pool yourself", and so does tokio.
-fn optional_threads(threads: i32) -> Option<usize> {
+pub(crate) fn optional_threads(threads: i32) -> Option<usize> {
     usize::try_from(threads).ok().filter(|&value| value > 0)
 }
 
@@ -215,39 +215,4 @@ pub fn parse_settings<F: ConfigFileSystem>(
     };
 
     Ok(LoadedConfig { config, warnings })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn given_a_disabled_limit_when_read_then_zero_and_negatives_both_switch_it_off() {
-        assert_eq!(optional_millis(-1), None);
-        assert_eq!(optional_millis(0), None);
-        assert_eq!(optional_millis(30_000), Some(Duration::from_millis(30_000)));
-    }
-
-    #[test]
-    fn given_an_interval_in_seconds_when_read_then_it_keeps_its_fraction() {
-        assert_eq!(optional_seconds(7.0), Some(Duration::from_secs(7)));
-        assert_eq!(optional_seconds(0.5), Some(Duration::from_millis(500)));
-        assert_eq!(optional_seconds(-1.0), None);
-    }
-
-    /// A `Duration` cannot hold either, and building one from them panics, so both have
-    /// to be filtered out before the conversion rather than after it.
-    #[test]
-    fn given_an_interval_that_is_not_a_number_when_read_then_it_is_simply_off() {
-        assert_eq!(optional_seconds(f64::NAN), None);
-        assert_eq!(optional_seconds(f64::INFINITY), None);
-        assert_eq!(optional_rate(f64::NAN), None);
-    }
-
-    #[test]
-    fn given_a_thread_count_of_zero_when_read_then_the_runtime_decides() {
-        assert_eq!(optional_threads(0), None);
-        assert_eq!(optional_threads(-4), None);
-        assert_eq!(optional_threads(4), Some(4));
-    }
 }

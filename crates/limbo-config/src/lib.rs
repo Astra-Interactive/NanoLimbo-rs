@@ -75,7 +75,7 @@ mod settings {
         //! secrets and tokens that may be read from files next to `settings.yml`.
 
         mod info_forwarding;
-        mod info_forwarding_resolver;
+        pub(crate) mod info_forwarding_resolver;
         mod resolved_forwarding;
 
         pub use info_forwarding::InfoForwarding;
@@ -179,7 +179,7 @@ mod settings {
     mod limbo_config;
     mod loaded_config;
     mod settings_error;
-    mod settings_parser;
+    pub(crate) mod settings_parser;
 
     pub use config_warning::ConfigWarning;
     pub(crate) use dimension_parser::parse_dimension_type;
@@ -199,3 +199,7 @@ pub use settings::player_list::{HeaderAndFooterConfig, PlayerListConfig};
 pub use settings::title::{Ticks, TitleConfig};
 pub use settings::traffic::TrafficConfig;
 pub use settings::{ConfigWarning, LimboConfig, LoadedConfig, SettingsError, parse_settings};
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;
