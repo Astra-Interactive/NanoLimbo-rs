@@ -23,7 +23,7 @@ mod options {
     //! The command line: which servers to measure, and how hard to push them.
 
     mod bench_error;
-    mod bench_options;
+    pub(crate) mod bench_options;
     mod bench_target;
 
     pub use bench_error::BenchError;
@@ -43,3 +43,7 @@ pub use client::LoginClient;
 pub use memory::{MemorySource, ResidentMemory};
 pub use options::{BenchError, BenchOptions, BenchTarget};
 pub use report::TargetReport;
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;
