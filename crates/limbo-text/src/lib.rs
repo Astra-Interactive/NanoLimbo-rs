@@ -65,3 +65,7 @@ mod wire {
 
 pub use markup::{parse, to_legacy_string};
 pub use wire::{JsonProfile, to_json_for, write_component};
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;
