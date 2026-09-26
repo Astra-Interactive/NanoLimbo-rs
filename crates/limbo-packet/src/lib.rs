@@ -49,18 +49,18 @@ pub mod play {
     mod boss_bar_division;
     mod chat_message;
     mod chat_position;
-    mod chunk_with_light;
+    pub(crate) mod chunk_with_light;
     mod declare_commands;
     mod disconnect;
     mod game_event;
     mod join_game;
     mod keep_alive;
-    mod player_abilities;
+    pub(crate) mod player_abilities;
     mod player_info;
     mod player_list_header;
     mod player_position_and_look;
     mod plugin_message;
-    mod spawn_position;
+    pub(crate) mod spawn_position;
     mod title_legacy;
     mod title_set_subtitle;
     mod title_set_title;
@@ -115,3 +115,7 @@ mod encoding {
 }
 
 pub use encoding::{ClientboundPacket, PacketEncodeError, PreEncodedPacket};
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;

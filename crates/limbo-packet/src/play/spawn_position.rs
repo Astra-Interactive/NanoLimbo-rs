@@ -11,7 +11,7 @@ use crate::encoding::PacketEncodeError;
 ///
 /// Computed unsigned because the X shift moves bits into the sign position, which Java
 /// wraps silently and Rust would otherwise trap on in a debug build.
-fn encode_position(x: i64, y: i64, z: i64) -> i64 {
+pub(crate) fn encode_position(x: i64, y: i64, z: i64) -> i64 {
     let packed =
         ((x as u64 & 0x3FF_FFFF) << 38) | ((z as u64 & 0x3FF_FFFF) << 12) | (y as u64 & 0xFFF);
 
@@ -48,35 +48,5 @@ impl ClientboundPacket for SpawnPosition<'_> {
         }
 
         Ok(())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn given_the_origin_when_packed_then_only_the_height_survives() {
-        assert_eq!(encode_position(0, 400, 0), 400);
-    }
-
-    #[test]
-    fn given_a_coordinate_that_reaches_the_sign_bit_when_packed_then_it_wraps_like_java() {
-        // 0x2000000 is bit 25 of X, which the 38-bit shift moves onto bit 63.
-        assert_eq!(encode_position(0x200_0000, 0, 0), i64::MIN);
-    }
-
-    #[test]
-    fn given_negative_coordinates_when_packed_then_each_field_keeps_its_low_bits() {
-        let packed = encode_position(-1, -1, -1);
-
-        assert_eq!(packed >> 38, -1);
-        assert_eq!((packed << 26) >> 38, -1);
-        assert_eq!((packed << 52) >> 52, -1);
-    }
-
-    #[test]
-    fn given_a_height_wider_than_twelve_bits_when_packed_then_it_is_truncated() {
-        assert_eq!(encode_position(0, 0x1000, 0), 0);
     }
 }
