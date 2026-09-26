@@ -29,11 +29,11 @@ pub mod forwarding {
     mod bungee_guard_verifier;
     mod forwarded_identity;
     mod forwarded_profile;
-    mod handshake_fields;
+    pub(crate) mod handshake_fields;
     mod legacy_forwarding;
     mod legacy_forwarding_error;
     mod modern_forwarding_error;
-    mod modern_forwarding_verifier;
+    pub(crate) mod modern_forwarding_verifier;
 
     pub use bungee_guard_forwarding_error::BungeeGuardForwardingError;
     pub use bungee_guard_verifier::BungeeGuardVerifier;
@@ -54,7 +54,7 @@ pub mod frame {
     //! and the length prefix is capped at 21 bits.
 
     mod frame_error;
-    mod length_prefix;
+    pub(crate) mod length_prefix;
     mod var_int_frame_codec;
 
     pub use frame_error::FrameError;
@@ -103,3 +103,7 @@ pub mod traffic {
     pub use traffic_sample::TrafficSample;
     pub use traffic_verdict::TrafficVerdict;
 }
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;
