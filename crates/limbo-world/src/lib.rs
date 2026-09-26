@@ -56,3 +56,7 @@ pub use tag::{TagEntry, TagRegistry, UpdateTagsError, UpdateTagsRegistry};
 /// Re-exported: writing a compound is a protocol primitive, not a world concern,
 /// but callers of this crate reach for it in the same breath as a codec.
 pub use limbo_protocol::buffer::{NbtEncodeError, write_compound};
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;
