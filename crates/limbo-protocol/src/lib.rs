@@ -14,7 +14,7 @@ pub mod buffer {
     mod packet_decode_error;
     mod protocol_read;
     mod protocol_write;
-    mod write_compound;
+    pub(crate) mod write_compound;
 
     pub use nbt_encode_error::NbtEncodeError;
     pub use packet_decode_error::PacketDecodeError;
@@ -35,7 +35,7 @@ pub mod packet {
     mod packet_direction;
     mod packet_kind;
     mod packet_mapping;
-    mod packet_mappings;
+    pub(crate) mod packet_mappings;
     mod packet_route;
     mod version_range;
 
@@ -56,3 +56,7 @@ pub mod version {
     pub use protocol_version::{ProtocolVersion, SUPPORTED};
     pub use version_descriptor::VersionDescriptor;
 }
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;
