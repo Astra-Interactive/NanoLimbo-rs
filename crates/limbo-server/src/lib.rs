@@ -9,7 +9,7 @@ pub mod connection {
     //! sends, under the policy the configuration sets.
 
     mod connection_action;
-    mod connection_flow;
+    pub(crate) mod connection_flow;
     mod forwarding_mode;
     mod server_policy;
 
@@ -70,3 +70,7 @@ pub mod serverbound {
     pub use plugin_message::PluginMessage;
     pub use serverbound_packet::ServerBoundPacket;
 }
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;
