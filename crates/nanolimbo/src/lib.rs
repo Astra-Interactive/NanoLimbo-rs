@@ -67,3 +67,7 @@ pub mod snapshot {
     pub use packet_snapshots::PacketSnapshots;
     pub use title_snapshots::TitleSnapshots;
 }
+
+#[cfg(test)]
+#[path = "../test/lib.rs"]
+mod test;
