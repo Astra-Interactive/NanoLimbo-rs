@@ -4,8 +4,8 @@ use nanolimbo::lifecycle::StartupError;
 use nanolimbo::lifecycle::install_logging;
 use nanolimbo::lifecycle::{prepare, serve};
 
-use crate::cancellation_token::CancellationToken;
-use crate::start_status::StartStatus;
+use crate::embedding::CancellationToken;
+use crate::embedding::StartStatus;
 
 /// Blocks the calling thread until `token` is cancelled.
 ///
