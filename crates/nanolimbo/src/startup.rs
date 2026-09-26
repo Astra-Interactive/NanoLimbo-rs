@@ -85,6 +85,7 @@ pub async fn serve(
         listener,
         Arc::clone(&context),
         shutdown.clone(),
+        shutdown.subscribe(),
     ));
 
     let mut stopping = shutdown.subscribe();

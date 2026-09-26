@@ -203,11 +203,12 @@ async fn start_server() -> SocketAddr {
         .expect("an ephemeral port");
     let address = listener.local_addr().expect("the bound address");
 
-    let (shutdown, _) = broadcast::channel(1);
+    let (shutdown, stopping) = broadcast::channel(1);
     tokio::spawn(accept_until_shutdown(
         listener,
         Arc::clone(&prepared.context),
         shutdown,
+        stopping,
     ));
 
     address
