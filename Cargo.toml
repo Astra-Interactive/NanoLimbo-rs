@@ -13,6 +13,7 @@ repository = "https://github.com/Astra-Interactive/NanoLimbo-rs"
 unsafe_code = "forbid"
 
 [workspace.lints.clippy]
+mod_module_files = "deny"
 indexing_slicing = "warn"
 panic = "warn"
 unwrap_used = "warn"
