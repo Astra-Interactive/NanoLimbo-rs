@@ -11,7 +11,7 @@ use tokio::sync::{broadcast, mpsc};
 /// and speaks to the runtime through a channel. When the thread ends — a closed pipe, or
 /// the terminal going away — the channel closes and the command loop simply stops
 /// listening, which leaves the server running.
-pub fn read_lines() -> mpsc::Receiver<String> {
+pub(crate) fn read_console_lines() -> mpsc::Receiver<String> {
     let (sender, receiver) = mpsc::channel(8);
 
     std::thread::spawn(move || {
@@ -54,7 +54,7 @@ fn execute(command: ConsoleCommand, connections: &ConnectionRegistry, version: &
 }
 
 /// Handles console input until the server stops or input runs out.
-pub async fn run(
+pub(crate) async fn run_console(
     mut lines: mpsc::Receiver<String>,
     connections: Arc<ConnectionRegistry>,
     version: String,

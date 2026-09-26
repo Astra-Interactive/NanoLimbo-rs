@@ -6,8 +6,8 @@ use limbo_server::connection::ForwardingMode;
 use limbo_server::connection::ServerPolicy;
 use limbo_server::player::ConnectionRegistry;
 
-use crate::packet_snapshots::PacketSnapshots;
-use crate::random_id_source::RandomIdSource;
+use crate::id::RandomIdSource;
+use crate::snapshot::PacketSnapshots;
 
 /// Everything a connection task needs, shared by all of them.
 ///

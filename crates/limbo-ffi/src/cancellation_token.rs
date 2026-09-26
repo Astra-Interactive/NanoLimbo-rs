@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use nanolimbo::shutdown_source::ShutdownSource;
+use nanolimbo::lifecycle::ShutdownSource;
 use tokio::sync::Notify;
 
 /// `start_app` blocks for the server's lifetime, so a stop always arrives on another

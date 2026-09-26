@@ -20,7 +20,7 @@ pub fn level_from_debug_setting(debug_level: i32) -> Level {
 ///
 /// A subscriber is global, so an embedded server may find the host already installed one.
 /// Keeping it beats aborting the host over a logging setting.
-pub fn install(debug_level: i32) {
+pub fn install_logging(debug_level: i32) {
     let level = level_from_debug_setting(debug_level);
     let filter = EnvFilter::try_from_default_env()
         .unwrap_or_else(|_unset| EnvFilter::new(level.to_string().to_lowercase()));

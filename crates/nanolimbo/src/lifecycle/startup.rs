@@ -9,14 +9,15 @@ use limbo_world::{DimensionRegistry, UpdateTagsRegistry};
 use tokio::net::TcpListener;
 use tokio::sync::broadcast;
 
-use crate::forwarding_verifiers::ForwardingVerifiers;
-use crate::packet_snapshots::PacketSnapshots;
-use crate::prepared_server::PreparedServer;
-use crate::random_id_source::RandomIdSource;
-use crate::server_context::ServerContext;
-use crate::shutdown_source::ShutdownSource;
-use crate::startup_error::StartupError;
-use crate::{console, listener};
+use crate::connection::accept_until_shutdown;
+use crate::di::ForwardingVerifiers;
+use crate::di::ServerContext;
+use crate::id::RandomIdSource;
+use crate::lifecycle::PreparedServer;
+use crate::lifecycle::ShutdownSource;
+use crate::lifecycle::StartupError;
+use crate::lifecycle::{read_console_lines, run_console};
+use crate::snapshot::PacketSnapshots;
 
 /// Reported by the `version` command and useful in a bug report.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -73,15 +74,15 @@ pub async fn serve(
     tracing::info!("Server started on {address}");
 
     if shutdown_source.owns_console() {
-        tokio::spawn(console::run(
-            console::read_lines(),
+        tokio::spawn(run_console(
+            read_console_lines(),
             Arc::clone(&context.connections),
             VERSION.to_owned(),
             shutdown.clone(),
         ));
     }
 
-    let accepting = tokio::spawn(listener::accept_until_shutdown(
+    let accepting = tokio::spawn(accept_until_shutdown(
         listener,
         Arc::clone(&context),
         shutdown.clone(),

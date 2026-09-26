@@ -17,7 +17,7 @@ use limbo_server::id::IdSource;
 use limbo_world::{DimensionRegistry, UpdateTagsRegistry, VersionedDimension};
 use uuid::Uuid;
 
-use crate::title_snapshots::TitleSnapshots;
+use crate::snapshot::TitleSnapshots;
 
 /// Channel the server announces its name on, shown under F3.
 const BRAND_CHANNEL: &str = "minecraft:brand";

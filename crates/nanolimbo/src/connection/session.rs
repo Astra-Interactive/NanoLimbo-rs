@@ -3,18 +3,13 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use bytes::{BufMut, Bytes, BytesMut};
-use futures_util::{SinkExt, StreamExt};
-use limbo_config::InfoForwarding;
-use limbo_net::forwarding::parse_legacy_handshake;
+use futures_util::SinkExt;
 use limbo_net::frame::VarIntFrameCodec;
-use limbo_net::identity::offline_mode_uuid;
-use limbo_net::time::SystemClock;
-use limbo_net::traffic::{TrafficLimiter, TrafficLimits, TrafficVerdict};
 use limbo_packet::login::{LoginDisconnect, LoginPluginRequest};
 use limbo_packet::play::{Disconnect, KeepAlive};
 use limbo_packet::status::StatusResponse;
 use limbo_packet::{ClientboundPacket, PreEncodedPacket};
-use limbo_protocol::buffer::{ProtocolRead, ProtocolWrite};
+use limbo_protocol::buffer::ProtocolWrite;
 use limbo_protocol::packet::{ConnectionState, PacketDirection, PacketKind, PacketRoute};
 use limbo_protocol::version::ProtocolVersion;
 use limbo_server::connection::ConnectionAction;
@@ -23,60 +18,47 @@ use limbo_server::connection::ForwardingMode;
 use limbo_server::id::IdSource;
 use limbo_server::player::ConnectedPlayer;
 use limbo_server::player::ConnectionId;
-use limbo_server::serverbound::ServerBoundPacket;
 use limbo_text::chat::Component;
 use tokio::net::TcpStream;
 use tokio_util::codec::Framed;
-use uuid::Uuid;
 
-use crate::server_context::ServerContext;
+use crate::connection::Ending;
+use crate::di::ServerContext;
 
-/// How often the server asks the client to prove it is still there.
-const KEEP_ALIVE_INTERVAL: Duration = Duration::from_secs(5);
+pub(crate) type Connection = Framed<TcpStream, VarIntFrameCodec>;
 
-/// Channel Velocity forwards the player's identity over.
-const PLAYER_INFO_CHANNEL: &str = "velocity:player_info";
-
-/// Clients up to 1.7.6 drop packets arriving with the join game packet, so theirs wait.
-const SPAWN_DELAY: Duration = Duration::from_millis(100);
-
-/// Version of Velocity's forwarding format this server understands.
-const SUPPORTED_FORWARDING_VERSION: u8 = 1;
-
-type Connection = Framed<TcpStream, VarIntFrameCodec>;
-
-/// Prefixes a payload with the id it travels under on this route.
-fn frame_for(route: PacketRoute, kind: PacketKind, payload: &[u8]) -> Option<Bytes> {
-    let id = route.id_of(kind)?;
-    let mut framed = BytesMut::with_capacity(payload.len() + 5);
-    framed.write_var_int(id);
-    framed.extend_from_slice(payload);
-    Some(framed.freeze())
-}
-
-/// Why a connection ended. Every variant is ordinary; none is a server fault.
-#[derive(Debug)]
-enum Ending {
-    ClientClosed,
-    Timeout,
-    Refused,
-    Malformed,
-    TooMuchTraffic,
-    ServerStopping,
-}
-
-struct Session {
-    context: Arc<ServerContext>,
-    flow: ConnectionFlow,
+/// One client's connection: where it is in the protocol, and what the server knows about
+/// the player behind it.
+pub(crate) struct Session {
+    pub(crate) context: Arc<ServerContext>,
+    pub(crate) flow: ConnectionFlow,
     address: SocketAddr,
-    incoming: PacketRoute,
+    pub(crate) incoming: PacketRoute,
     outgoing: PacketRoute,
-    registered: Option<ConnectionId>,
-    forwarded_address: Option<String>,
+    pub(crate) registered: Option<ConnectionId>,
+    pub(crate) forwarded_address: Option<String>,
 }
 
 impl Session {
-    fn new(context: Arc<ServerContext>, address: SocketAddr) -> Self {
+    /// Channel Velocity forwards the player's identity over.
+    const PLAYER_INFO_CHANNEL: &str = "velocity:player_info";
+
+    /// Clients up to 1.7.6 drop packets arriving with the join game packet, so theirs wait.
+    const SPAWN_DELAY: Duration = Duration::from_millis(100);
+
+    /// Version of Velocity's forwarding format this server understands.
+    const SUPPORTED_FORWARDING_VERSION: u8 = 1;
+
+    /// Prefixes a payload with the id it travels under on this route.
+    fn frame_for(route: PacketRoute, kind: PacketKind, payload: &[u8]) -> Option<Bytes> {
+        let id = route.id_of(kind)?;
+        let mut framed = BytesMut::with_capacity(payload.len() + 5);
+        framed.write_var_int(id);
+        framed.extend_from_slice(payload);
+        Some(framed.freeze())
+    }
+
+    pub(crate) fn new(context: Arc<ServerContext>, address: SocketAddr) -> Self {
         let policy = context.policy();
         Self {
             context,
@@ -98,7 +80,7 @@ impl Session {
     }
 
     /// The address to log and to report, which a proxy may have replaced.
-    fn reported_address(&self) -> String {
+    pub(crate) fn reported_address(&self) -> String {
         if !self.context.config.log_players_ip {
             return "<redacted>".to_owned();
         }
@@ -109,7 +91,7 @@ impl Session {
     }
 
     async fn send(&self, connection: &mut Connection, kind: PacketKind, payload: &[u8]) {
-        let Some(frame) = frame_for(self.outgoing, kind, payload) else {
+        let Some(frame) = Self::frame_for(self.outgoing, kind, payload) else {
             tracing::debug!(?kind, version = %self.outgoing.version(), "no id for packet here");
             return;
         };
@@ -293,7 +275,7 @@ impl Session {
         self.send_keep_alive(connection).await;
     }
 
-    async fn send_keep_alive(&self, connection: &mut Connection) {
+    pub(crate) async fn send_keep_alive(&self, connection: &mut Connection) {
         if self.outgoing.state() != ConnectionState::Play {
             return;
         }
@@ -358,7 +340,7 @@ impl Session {
     ///
     /// Returns `Some` when the connection is finished, which the caller reports and acts
     /// on rather than deciding for itself.
-    async fn perform(
+    pub(crate) async fn perform(
         &mut self,
         connection: &mut Connection,
         action: ConnectionAction,
@@ -394,8 +376,8 @@ impl Session {
                     connection,
                     &LoginPluginRequest {
                         message_id,
-                        channel: PLAYER_INFO_CHANNEL,
-                        data: &[SUPPORTED_FORWARDING_VERSION],
+                        channel: Self::PLAYER_INFO_CHANNEL,
+                        data: &[Self::SUPPORTED_FORWARDING_VERSION],
                     },
                 )
                 .await;
@@ -434,7 +416,7 @@ impl Session {
             }
             ConnectionAction::SpawnPlayer => self.spawn_player(connection).await,
             ConnectionAction::SpawnPlayerAfterDelay => {
-                tokio::time::sleep(SPAWN_DELAY).await;
+                tokio::time::sleep(Self::SPAWN_DELAY).await;
                 self.spawn_player(connection).await;
             }
             ConnectionAction::Disconnect { reason } => {
@@ -445,262 +427,4 @@ impl Session {
 
         None
     }
-}
-
-/// Reads a proxy-forwarded identity out of the handshake host field.
-///
-/// Both proxy formats pack it into that field separated by NUL bytes, so it is available
-/// before the client has said anything else.
-fn forwarded_from_handshake(context: &ServerContext, host: &str) -> Option<ForwardedFromProxy> {
-    match &context.config.info_forwarding {
-        InfoForwarding::Legacy => {
-            parse_legacy_handshake(host)
-                .ok()
-                .map(|identity| ForwardedFromProxy {
-                    address: identity.address,
-                    uuid: identity.uuid,
-                })
-        }
-        InfoForwarding::BungeeGuard { .. } => {
-            context
-                .bungee_guard
-                .as_ref()?
-                .verify(host)
-                .ok()
-                .map(|identity| ForwardedFromProxy {
-                    address: identity.address,
-                    uuid: identity.uuid,
-                })
-        }
-        InfoForwarding::None | InfoForwarding::Modern { .. } => None,
-    }
-}
-
-/// What a proxy vouched for in the handshake.
-struct ForwardedFromProxy {
-    address: String,
-    uuid: Uuid,
-}
-
-/// Builds the per-connection limiter, or nothing when limits are switched off.
-///
-/// Each connection gets its own: the limits are per player, and sharing one would let a
-/// busy server throttle a quiet client.
-fn build_limiter(context: &ServerContext) -> Option<TrafficLimiter<SystemClock>> {
-    let traffic = context.config.traffic.as_ref()?;
-
-    Some(TrafficLimiter::new(
-        TrafficLimits {
-            max_packet_size: traffic.max_packet_size.map(|size| size as usize),
-            window: traffic.interval.unwrap_or(Duration::ZERO),
-            max_packets_per_second: traffic.max_packet_rate,
-            max_bytes_per_second: traffic.max_packet_bytes_rate,
-        },
-        SystemClock,
-    ))
-}
-
-/// Serves one client until it leaves, misbehaves, or the server stops.
-pub async fn serve(
-    stream: TcpStream,
-    address: SocketAddr,
-    context: Arc<ServerContext>,
-    mut shutdown: tokio::sync::broadcast::Receiver<()>,
-) {
-    if let Err(error) = stream.set_nodelay(true) {
-        tracing::debug!(%error, "could not disable Nagle's algorithm");
-    }
-
-    let read_timeout = context.config.read_timeout;
-    let mut limiter = build_limiter(&context);
-    let mut session = Session::new(Arc::clone(&context), address);
-    let mut connection = Framed::new(stream, VarIntFrameCodec);
-    let mut keep_alive = tokio::time::interval(KEEP_ALIVE_INTERVAL);
-    keep_alive.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
-
-    let ending = loop {
-        let next = tokio::select! {
-            frame = read_frame(&mut connection, read_timeout) => frame,
-            _ = keep_alive.tick() => {
-                session.send_keep_alive(&mut connection).await;
-                continue;
-            }
-            _ = shutdown.recv() => break Ending::ServerStopping,
-        };
-
-        let frame = match next {
-            Ok(Some(frame)) => frame,
-            Ok(None) => break Ending::ClientClosed,
-            Err(ending) => break ending,
-        };
-
-        if let Some(limiter) = limiter.as_mut()
-            && let Some(ending) = check_traffic(limiter, &session, frame.len())
-        {
-            break ending;
-        }
-
-        if let Some(ending) = handle_frame(&mut session, &mut connection, frame).await {
-            break ending;
-        }
-    };
-
-    if let Some(id) = session.registered
-        && let Some(player) = context.connections.remove(id)
-    {
-        tracing::info!("Player {} disconnected", player.username);
-    }
-    tracing::debug!(?ending, address = %session.reported_address(), "connection closed");
-}
-
-/// Applies the configured traffic limits to one frame.
-///
-/// Over the limit the connection is dropped without a message, as upstream does: a client
-/// flooding the server is not one that will read a kick screen.
-fn check_traffic(
-    limiter: &mut TrafficLimiter<SystemClock>,
-    session: &Session,
-    size: usize,
-) -> Option<Ending> {
-    match limiter.check(size) {
-        TrafficVerdict::Allowed => None,
-        verdict => {
-            tracing::info!(
-                "Closed {} due to traffic limits: {verdict:?}",
-                session.reported_address()
-            );
-            Some(Ending::TooMuchTraffic)
-        }
-    }
-}
-
-/// Waits for the next frame, treating silence past the configured timeout as a departure.
-async fn read_frame(
-    connection: &mut Connection,
-    read_timeout: Option<Duration>,
-) -> Result<Option<Bytes>, Ending> {
-    let next = match read_timeout {
-        Some(limit) => match tokio::time::timeout(limit, connection.next()).await {
-            Ok(next) => next,
-            Err(_elapsed) => return Err(Ending::Timeout),
-        },
-        None => connection.next().await,
-    };
-
-    match next {
-        Some(Ok(frame)) => Ok(Some(frame)),
-        Some(Err(error)) => {
-            tracing::debug!(%error, "malformed frame");
-            Err(Ending::Malformed)
-        }
-        None => Ok(None),
-    }
-}
-
-/// Decodes one frame and carries out whatever it leads to.
-async fn handle_frame(
-    session: &mut Session,
-    connection: &mut Connection,
-    frame: Bytes,
-) -> Option<Ending> {
-    let mut payload = frame;
-    let id = match payload.read_var_int() {
-        Ok(id) => id,
-        Err(error) => {
-            tracing::debug!(%error, "frame without a packet id");
-            return Some(Ending::Malformed);
-        }
-    };
-
-    let packet = match ServerBoundPacket::decode(session.incoming, id, &mut payload) {
-        Ok(Some(packet)) => packet,
-        // An id the server has no use for. Upstream ignores these too.
-        Ok(None) => return None,
-        Err(error) => {
-            tracing::debug!(%error, id, "could not decode a packet");
-            return Some(Ending::Malformed);
-        }
-    };
-
-    let extra = adopt_identity(session, &packet);
-    let online = session.context.connections.count() as i32;
-
-    let mut actions = session.flow.handle(packet, online);
-    actions.extend(extra);
-
-    for action in actions {
-        if let Some(ending) = session.perform(connection, action).await {
-            return Some(ending);
-        }
-    }
-    None
-}
-
-/// Pulls the player's identity out of whichever packet carries it.
-///
-/// Returns the extra steps that follow, which for Velocity is the whole of login: its
-/// reply is what the server was waiting for.
-fn adopt_identity(session: &mut Session, packet: &ServerBoundPacket) -> Vec<ConnectionAction> {
-    match packet {
-        ServerBoundPacket::Handshake(handshake) => {
-            match forwarded_from_handshake(&session.context, &handshake.host) {
-                Some(forwarded) => {
-                    session.forwarded_address = Some(forwarded.address);
-                    session.flow.adopt_offline_identity(forwarded.uuid);
-                    Vec::new()
-                }
-                None => Vec::new(),
-            }
-        }
-        ServerBoundPacket::LoginStart(login) => {
-            // Without a proxy the identity is derived from the name, as it is in
-            // offline mode everywhere else.
-            if session.context.forwarding_mode() != ForwardingMode::Modern {
-                session
-                    .flow
-                    .adopt_offline_identity(offline_mode_uuid(&login.username));
-            }
-            Vec::new()
-        }
-        ServerBoundPacket::LoginPluginResponse(response) => {
-            accept_velocity_reply(session, response)
-        }
-        _ => Vec::new(),
-    }
-}
-
-fn accept_velocity_reply(
-    session: &mut Session,
-    response: &limbo_server::serverbound::LoginPluginResponse,
-) -> Vec<ConnectionAction> {
-    if !session.flow.forwarding_reply_matches(response.message_id) {
-        return Vec::new();
-    }
-
-    let Some(verifier) = &session.context.modern_forwarding else {
-        return Vec::new();
-    };
-    if !response.successful {
-        return vec![refusal("You need to connect with Velocity")];
-    }
-
-    match verifier.verify(&response.data) {
-        Ok(profile) => session.flow.accept_forwarded_identity(
-            profile.username,
-            profile.identity.uuid,
-            profile.identity.address,
-        ),
-        Err(error) => {
-            tracing::debug!(%error, "rejected forwarded player info");
-            vec![refusal("Can't verify forwarded player info")]
-        }
-    }
-}
-
-fn refusal(message: &str) -> ConnectionAction {
-    let mut reason = Component::text(message);
-    reason.style.color = Some(limbo_text::chat::TextColor::Named(
-        limbo_text::chat::NamedColor::Red,
-    ));
-    ConnectionAction::Disconnect { reason }
 }

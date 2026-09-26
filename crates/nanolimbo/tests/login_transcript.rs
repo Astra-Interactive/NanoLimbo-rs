@@ -17,8 +17,8 @@ use std::time::Duration;
 
 use limbo_protocol::packet::{ConnectionState, PacketDirection, PacketKind, PacketRoute};
 use limbo_protocol::version::ProtocolVersion;
-use nanolimbo::listener::accept_until_shutdown;
-use nanolimbo::startup::prepare;
+use nanolimbo::connection::accept_until_shutdown;
+use nanolimbo::lifecycle::prepare;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::broadcast;

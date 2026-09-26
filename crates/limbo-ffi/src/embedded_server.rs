@@ -1,8 +1,8 @@
 use std::path::Path;
 
-use nanolimbo::logging;
-use nanolimbo::startup::{prepare, serve};
-use nanolimbo::startup_error::StartupError;
+use nanolimbo::lifecycle::StartupError;
+use nanolimbo::lifecycle::install_logging;
+use nanolimbo::lifecycle::{prepare, serve};
 
 use crate::cancellation_token::CancellationToken;
 use crate::start_status::StartStatus;
@@ -22,7 +22,7 @@ pub fn run(token: &CancellationToken, configuration_directory: &Path) -> StartSt
     };
     let context = prepared.context;
 
-    logging::install(context.config.debug_level);
+    install_logging(context.config.debug_level);
     for warning in prepared.warnings {
         tracing::warn!("{warning}");
     }

@@ -7,16 +7,16 @@
 use std::path::Path;
 use std::process::ExitCode;
 
-use nanolimbo::logging;
-use nanolimbo::shutdown_source::ShutdownSource;
-use nanolimbo::startup::{prepare, serve};
-use nanolimbo::startup_error::StartupError;
+use nanolimbo::lifecycle::ShutdownSource;
+use nanolimbo::lifecycle::StartupError;
+use nanolimbo::lifecycle::install_logging;
+use nanolimbo::lifecycle::{prepare, serve};
 
 fn run() -> Result<(), StartupError> {
     let prepared = prepare(Path::new("."))?;
     let context = prepared.context;
 
-    logging::install(context.config.debug_level);
+    install_logging(context.config.debug_level);
     for warning in prepared.warnings {
         tracing::warn!("{warning}");
     }

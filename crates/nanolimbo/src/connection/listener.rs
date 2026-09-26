@@ -3,8 +3,8 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::broadcast;
 
-use crate::connection_task::serve;
-use crate::server_context::ServerContext;
+use crate::connection::serve;
+use crate::di::ServerContext;
 
 /// Accepts connections until told to stop.
 ///
