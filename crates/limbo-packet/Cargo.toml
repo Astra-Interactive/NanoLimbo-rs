@@ -18,7 +18,7 @@ uuid.workspace = true
 valence_nbt.workspace = true
 
 [dev-dependencies]
-sha2 = "0.10"
+sha2 = "0.11"
 
 [lints]
 workspace = true
