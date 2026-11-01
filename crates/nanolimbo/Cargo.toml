@@ -17,7 +17,7 @@ limbo-protocol = { path = "../limbo-protocol" }
 limbo-server = { path = "../limbo-server" }
 limbo-text = { path = "../limbo-text" }
 limbo-world = { path = "../limbo-world" }
-rand = "0.9"
+rand = "0.10"
 thiserror.workspace = true
 tokio.workspace = true
 tokio-util.workspace = true
